@@ -1,0 +1,54 @@
+<ion-content>
+
+  <!-- Primera sección -->
+  <div class="primer-fondo hero-block pb-5 position-relative pt-5 text-white-50">
+    <div class="col-lg-8 end-0 h-100 position-absolute top-0">
+    </div>
+    <ion-grid>
+      <ion-row class="align-items-center gy-4">
+        <ion-col size-lg="12" class="text-center textos pb-4">
+          <h1 class="display-3 fw-bold text-uppercase titulo-inicial text-white">{{carta.nombreCarta}}</h1>
+          <p class="lead mb-4 text-white pe-sm-5 parrafo">Toda la información que necesitas sobre esta carta se encuentra aquí</p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
+  <!-- Segunda sección -->
+  <ion-grid class="fondo-gris">
+
+    <ion-row class="align-items-center justify-content-center mb-5 pb-5 pt-5">
+
+      <!-- Imagen de la carta -->
+      <ion-col size-md="4" class="text-center">
+        <ion-img class="carta img-fluid" [src]="carta.urlImagen" [alt]="carta.nombreCarta"></ion-img>
+      </ion-col>
+
+      <!-- Información de la carta -->
+      <ion-col size-md="4" class="text-white pt-4 pb-4 cajaTexto">
+        <!-- El contenido permanece igual, simplemente reemplaza tus <div> con <ion-row> para mantener el diseño en Ionic -->
+        ...
+      </ion-col>
+
+    </ion-row>
+
+    <ion-row class="col text-center text-white pb-5">
+      <ion-col>
+        <h3>Otras versiones impresas de {{carta.nombreCarta}}</h3>
+        <h4 *ngIf="carta.urlImagen1 === null && carta.urlImagen2 === null && carta.urlImagen3 === null" >No existen otras versiones de esta carta.</h4>
+        <img *ngIf="carta.urlImagen1 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen1" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen2 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen2" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen3 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen3" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen4 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen4" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen5 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen5" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen6 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen6" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen7 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen7" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen8 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen8" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen9 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen9" [alt]="carta.nombreCarta">
+        <img *ngIf="carta.urlImagen10 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen10" [alt]="carta.nombreCarta">
+      </ion-col>
+    </ion-row>
+
+  </ion-grid>
+
+</ion-content>

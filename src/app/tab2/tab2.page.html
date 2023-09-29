@@ -1,17 +1,109 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+<!-- <ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>Buscador de cartas</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content class="ion-padding" color="dark">
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" *ngFor="let item of cartas">
+        <ion-img [src]="item.urlImagen"></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content> -->
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Buscador de cartas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="dark" class="ion-padding">
+
+    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText" (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
+
+    <ion-button color="warning" expand="block" (click)="searchByText()">Buscar</ion-button>
+
+
+  <ion-text class="ion-margin-top ion-margin-bottom">
+    <h5>Ó puedes buscar seleccionando los siguientes filtros:</h5>
+  </ion-text>
+
+  <ion-list>
+    <!-- Filtro de expansión -->
+    <ion-item>
+      <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)" placeholder="Selecciona una expansión">
+        <ion-select-option value="">Selecciona una expansión</ion-select-option>
+        <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Filtro de rareza -->
+    <ion-item>
+      <ion-label>Rarezas</ion-label>
+      <ion-select [(ngModel)]="selectedRareza" (ionChange)="onRarezaChange(selectedRareza)" placeholder="Selecciona una rareza">
+        <ion-select-option value="">Selecciona una rareza</ion-select-option>
+        <ion-select-option *ngFor="let rare of rarezas" [value]="rare.idRareza">{{rare.nombreRareza}}
+        </ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Filtro de tipo -->
+    <ion-item>
+      <ion-label>Tipos</ion-label>
+      <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
+        <ion-select-option value="">Selecciona un tipo de carta</ion-select-option>
+        <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Filtro de coste -->
+    <ion-item>
+      <ion-label>Coste</ion-label>
+      <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
+        <ion-select-option value="default">Selecciona un tipo de carta</ion-select-option>
+        <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <ion-grid>
+    <ion-row *ngFor="let carta of filteredCartas">
+      <ion-col size="12">
+        <ion-img class="carta" [src]="carta.urlImagen" (click)="visualizarCarta(carta.idCarta)"></ion-img>
+        <div class="carta-texto">
+          <p>{{acortarTexto(carta.textoCarta)}}</p>
+          <p><a (click)="visualizarCarta(carta.idCarta)">... Ver más</a></p>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-grid
+    *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null && selectedCoste === null && (searchText === '' || searchText === null)">
+    <ion-row *ngFor="let card of cartas">
+      <ion-col size="12">
+        <ion-img class="carta" [src]="card.urlImagen" (click)="visualizarCarta(card.idCarta)"></ion-img>
+        <div class="carta-texto">
+          <p>{{acortarTexto(card.textoCarta)}}</p>
+          <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
+        </div>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-grid
+    *ngIf="filteredCartas.length === 0 && (selectedRareza || selectedExpansion || selectedTipo || selectedCoste || searchText)">
+    <ion-row>
+      <ion-col class="ion-text-center">
+        <h2>No se han encontrado cartas con los filtros seleccionados.</h2>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+
+
 </ion-content>

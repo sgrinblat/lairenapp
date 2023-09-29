@@ -6,6 +6,10 @@ const routes: Routes = [
   {
     path: '',
     component: Tab2Page,
+  },
+  {
+    path: 'carta-individual',
+    loadChildren: () => import('./pages/carta-individual/carta-individual.module').then( m => m.CartaIndividualPageModule)
   }
 ];
 
