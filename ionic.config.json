@@ -1,0 +1,7 @@
+{
+  "name": "lairenmobile",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
