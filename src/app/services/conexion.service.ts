@@ -17,8 +17,8 @@ import { Jugador } from '../objetos/jugador';
 export class ConexionService {
 
   public loginStatus = new Subject<boolean>();
-  //private urlBasica = "https://lairentcg.com.ar:8443/api"
-  private urlBasica = "http://localhost:8080"
+  private urlBasica = "https://lairentcg.com.ar:8443/api"
+  //private urlBasica = "http://localhost:8080"
 
   private cartaURL = `${this.urlBasica}/carta/cartas`;
   private cartaPublicaURL = `${this.urlBasica}/carta`;
