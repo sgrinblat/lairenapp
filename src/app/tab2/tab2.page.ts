@@ -63,7 +63,7 @@ export class Tab2Page {
 
 
   visualizarCarta(id: number) {
-    this.route.navigate(['buscador/cartas', id]);
+    this.route.navigate(['/tabs/tab2/carta', id]);
   }
 
   acortarTexto(texto: string, limite: number = 35): string {

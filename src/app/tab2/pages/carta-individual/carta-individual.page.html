@@ -1,51 +1,119 @@
 <ion-content>
 
   <!-- Primera sección -->
-  <div class="primer-fondo hero-block pb-5 position-relative pt-5 text-white-50">
-    <div class="col-lg-8 end-0 h-100 position-absolute top-0">
-    </div>
+  <div class="ion-padding">
     <ion-grid>
-      <ion-row class="align-items-center gy-4">
-        <ion-col size-lg="12" class="text-center textos pb-4">
-          <h1 class="display-3 fw-bold text-uppercase titulo-inicial text-white">{{carta.nombreCarta}}</h1>
-          <p class="lead mb-4 text-white pe-sm-5 parrafo">Toda la información que necesitas sobre esta carta se encuentra aquí</p>
+      <ion-row class="ion-align-items-center">
+        <ion-col class="ion-text-center">
+          <h1 class="ion-text-uppercase">{{carta.nombreCarta}}</h1>
+          <p>Toda la información que necesitas sobre esta carta se encuentra aquí</p>
         </ion-col>
       </ion-row>
     </ion-grid>
   </div>
 
   <!-- Segunda sección -->
-  <ion-grid class="fondo-gris">
+  <ion-grid>
 
-    <ion-row class="align-items-center justify-content-center mb-5 pb-5 pt-5">
-
+    <ion-row>
       <!-- Imagen de la carta -->
-      <ion-col size-md="4" class="text-center">
-        <ion-img class="carta img-fluid" [src]="carta.urlImagen" [alt]="carta.nombreCarta"></ion-img>
+      <ion-col size="12" class="ion-padding-bottom">
+        <ion-img [src]="carta.urlImagen" [alt]="carta.nombreCarta"></ion-img>
       </ion-col>
 
       <!-- Información de la carta -->
-      <ion-col size-md="4" class="text-white pt-4 pb-4 cajaTexto">
-        <!-- El contenido permanece igual, simplemente reemplaza tus <div> con <ion-row> para mantener el diseño en Ionic -->
-        ...
-      </ion-col>
+      <ion-col size="12" class="ion-padding-top ion-padding-bottom">
 
+        <!-- Nombre de carta -->
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">
+            <h4>Nombre de carta: {{carta.nombreCarta}}</h4>
+          </ion-label>
+        </ion-item>
+
+        <!-- Tipo de carta -->
+        <ion-item *ngIf="carta?.tipo" lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Tipo de carta: {{carta?.tipo?.nombreTipo}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Coste -->
+        <ion-item *ngIf="carta?.tipo?.nombreTipo !== 'TESORO' && carta?.tipo?.nombreTipo !== 'TESORO - SAGRADO'"
+          lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Coste: {{carta.costeCarta}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Texto de carta -->
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Texto de carta: {{carta.textoCarta}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Texto de ambientación -->
+        <ion-item *ngIf="carta?.flavorCarta" lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Texto de ambientación: {{carta.flavorCarta}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Expansión -->
+        <ion-item *ngIf="carta?.expansion" lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Expansión: {{carta?.expansion?.nombreExpansion}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Rareza -->
+        <ion-item *ngIf="carta?.rareza" lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Rareza: {{carta?.rareza?.nombreRareza}}</h5>
+          </ion-label>
+        </ion-item>
+
+        <!-- Ruling -->
+        <ion-item lines="none">
+          <ion-label class="ion-text-wrap">
+            <h5>Ruling:
+              {{carta.rulingCarta ? carta.rulingCarta : 'No hay comentarios sobre esta carta en este momento.'}}</h5>
+          </ion-label>
+        </ion-item>
+
+
+
+
+      </ion-col>
     </ion-row>
 
-    <ion-row class="col text-center text-white pb-5">
+    <ion-row class="ion-text-center">
       <ion-col>
         <h3>Otras versiones impresas de {{carta.nombreCarta}}</h3>
-        <h4 *ngIf="carta.urlImagen1 === null && carta.urlImagen2 === null && carta.urlImagen3 === null" >No existen otras versiones de esta carta.</h4>
-        <img *ngIf="carta.urlImagen1 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen1" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen2 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen2" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen3 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen3" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen4 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen4" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen5 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen5" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen6 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen6" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen7 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen7" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen8 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen8" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen9 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen9" [alt]="carta.nombreCarta">
-        <img *ngIf="carta.urlImagen10 !== null" class="cartaAlter img-fluid" [src]="carta.urlImagen10" [alt]="carta.nombreCarta">
+        <h4 *ngIf="!carta.urlImagen1 && !carta.urlImagen2 && !carta.urlImagen3">No existen otras versiones de esta
+          carta.</h4>
+
+        <ion-img *ngIf="carta.urlImagen1" class="cartaAlter img-fluid" [src]="carta.urlImagen1"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen2" class="cartaAlter img-fluid" [src]="carta.urlImagen2"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen3" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen4" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen5" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen6" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen7" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen8" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen9" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
+        <ion-img *ngIf="carta.urlImagen10" class="cartaAlter img-fluid" [src]="carta.urlImagen3"
+          [alt]="carta.nombreCarta"></ion-img>
       </ion-col>
     </ion-row>
 
