@@ -11,6 +11,10 @@ const routes: Routes = [
     path: 'buscador/cartas/:id',
     loadChildren: () => import('./tab2/pages/carta-individual/carta-individual.module').then(m => m.CartaIndividualPageModule)
   },
+  {
+    path: 'decklist/:id',
+    loadChildren: () => import('./tab3/pages/decklist-individual/decklist-individual.module').then(m => m.DecklistIndividualPageModule)
+  },
 
 ];
 @NgModule({

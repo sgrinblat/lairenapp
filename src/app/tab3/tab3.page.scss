@@ -1,0 +1,55 @@
+.portadaDeck{
+  width: 100%;
+  max-width: 350px;
+  max-height: 200px;
+  margin: 10px;
+  border: 2px solid black;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.portadaDeck img {
+  width: 100%;
+  opacity: 0.8;
+}
+
+.portadaDeck-overlay {
+position: relative;
+}
+
+.overlay {
+position: absolute;
+top: 0;
+bottom: 0;
+left: 0;
+right: 0;
+background: rgba(0, 0, 0, 0.5);
+}
+
+.button-container {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+display: none;
+}
+
+.text-container {
+position: absolute;
+bottom: 10px;
+left: 10px;
+color: white;
+display: none;
+}
+
+.portadaDeck:hover .button-container{
+display: block;
+}
+
+.portadaDeck .text-container {
+display: block;
+}
