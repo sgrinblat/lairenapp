@@ -10,6 +10,7 @@ import { Expansion } from 'src/app/objetos/expansion';
 import { Usuario } from 'src/app/objetos/usuario';
 import { ConexionService } from 'src/app/services/conexion.service';
 
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 import { AlertController } from '@ionic/angular';
 import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
@@ -167,6 +168,24 @@ export class DecklistIndividualPage implements OnInit {
         console.error("Hubo un error cargando las imágenes: ", error);
     });
   }
+
+  async downloadAndSaveImage(imageUrl: string, imageName: string) {
+    // Descarga la imagen
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+
+    // Guarda la imagen en el almacenamiento local del dispositivo
+    await Filesystem.writeFile({
+      path: imageName,
+      data: base64,
+      directory: Directory.Data,
+    });
+
+    console.log('Image saved');
+  }
+
 
 
   ngOnInit(): void {

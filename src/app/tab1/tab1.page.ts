@@ -6,6 +6,7 @@ import { ConexionService } from '../services/conexion.service';
 
 import Swal from 'sweetalert2';
 import { Usuario } from '../objetos/usuario';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-tab1',
@@ -21,7 +22,8 @@ export class Tab1Page {
     private conexion: ConexionService,
     private readonly fb: FormBuilder,
     private activatedRoute: ActivatedRoute,
-    private route: Router
+    private route: Router,
+    private alertController: AlertController,
   ) {
     this.contactForm = fb.group({
       formularioNombreUsuario: [
@@ -60,75 +62,80 @@ export class Tab1Page {
                 if (user.emailVerified) {
                   this.conexion.setUser(userDetails);
                   localStorage.setItem('location', '0');
-                  console.log("lo lgoraste!!!")
+                  console.log("lo lograste!!!")
+                  this.presentAlert('Éxito', 'Inicio de sesión exitoso');
                   this.conexion.loginStatus.next(true);
 
                 } else {
+                  this.presentAlert('Fallido', 'No has verificado tu mail');
                   console.log("el alert del mail")
                 }
               },
               (error) => {
                 console.log("inicio fallido")
+                this.presentAlert('Fallido', 'Inicio de sesión fallido');
                 this.conexion.loginStatus.next(false);
               }
             );
           } else {
             console.log("inicio fallido")
+            this.presentAlert('Fallido', 'Inicio de sesión fallido');
             this.conexion.loginStatus.next(false);
           }
         });
       },
       (error) => {
         console.log("inicio fallido")
+        this.presentAlert('Fallido', 'Inicio de sesión fallido');
         this.conexion.loginStatus.next(false);
       }
     );
   }
 
 
-  recuperarPass() {
-
-    Swal.fire({
-      title: 'Ingresa el email con el que registraste tu cuenta)',
-      input: 'text',
-      background: '#2e3031',
-      color: '#fff',
-      inputAttributes: {
-        autocapitalize: 'off',
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      showLoaderOnConfirm: true,
-      allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        console.log(result.value);
-
-        this.conexion.requestPasswordReset(result.value).subscribe(
-          response => {
-            Swal.fire({
-              icon: 'success',
-              title: 'Email enviado!',
-              text: 'Revisá tu mail para restaurar tu contraseña',
-              background: '#2e3031',
-              color: '#fff',
-            });
+  async recuperarPass() {
+    const alert = await this.alertController.create({
+      header: 'Ingresa el email con el que registraste tu cuenta',
+      inputs: [
+        {
+          name: 'email',
+          type: 'text',
+          placeholder: 'Email',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+        },
+        {
+          text: 'Guardar',
+          handler: (data) => {
+            this.conexion.requestPasswordReset(data.email).subscribe(
+              (response) => {
+                this.presentAlert('Email enviado!', 'Revisá tu mail para restaurar tu contraseña');
+              },
+              (error) => {
+                this.presentAlert('Error', 'El mail no existe. Si sigues teniendo problemas, ponte en contacto con nosotros!');
+              }
+            );
           },
-          error => {
-            Swal.fire({
-              icon: 'error',
-              title: 'El mail no existe',
-              text: 'Si sigues teniendo problemas, ponte en contacto con nosotros!',
-              background: '#2e3031',
-              color: '#fff',
-            });
-          }
-        );
-      }
+        },
+      ],
     });
 
+    await alert.present();
   }
 
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header: header,
+      message: message,
+      buttons: ['OK'],
+    });
+
+    await alert.present();
+  }
 
 
 }

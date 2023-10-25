@@ -117,11 +117,17 @@
             <ion-button color="warning" *ngIf="!banderaImagenGenerada" (click)="generarImagen()">
               Generar imagen de decklist
             </ion-button>
-            <ion-button color="warning" *ngIf="banderaImagenGenerada">
+
+            <ion-button color="warning" *ngIf="banderaImagenGenerada" (click)="downloadAndSaveImage(imagenCombinada, 'imagenCombinada.jpg')">
+              Descargar imagen generada
+            </ion-button>
+
+
+            <!-- <ion-button color="warning" *ngIf="banderaImagenGenerada">
               <a [href]="imagenCombinada" download="imagenCombinada.jpg">
                 Descargar imagen generada
               </a>
-            </ion-button>
+            </ion-button> -->
           </div>
         </ion-col>
       </ion-row>

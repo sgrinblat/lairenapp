@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { BrowserModule } from '@angular/platform-browser';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 
