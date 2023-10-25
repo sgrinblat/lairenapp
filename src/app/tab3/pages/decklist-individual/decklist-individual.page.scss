@@ -3,3 +3,30 @@
   align-items: center;
   justify-content: space-between;
 }
+
+ion-text p {
+  font-size: 0.8em;
+}
+
+.carta-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.carta-contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.carta {
+  max-width: 85%;
+  height: auto;
+}
+
+
+.sin-fondo {
+  display: none;
+}

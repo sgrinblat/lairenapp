@@ -10,8 +10,8 @@ import { Expansion } from 'src/app/objetos/expansion';
 import { Usuario } from 'src/app/objetos/usuario';
 import { ConexionService } from 'src/app/services/conexion.service';
 
-import Swal from 'sweetalert2';
 
+import { AlertController } from '@ionic/angular';
 import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
 import { ImageGeneratorComponent } from './image-generator/image-generator.component';
 import { ImageSidedeckComponent } from './image-sidedeck/image-sidedeck.component';
@@ -53,6 +53,7 @@ export class DecklistIndividualPage implements OnInit {
     private conexion: ConexionService,
     private activatedRoute: ActivatedRoute,
     private route: Router,
+    private alertController: AlertController,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.reino = new Array<Carta>();
@@ -67,81 +68,52 @@ export class DecklistIndividualPage implements OnInit {
   @ViewChild('imageBoveda') ImageBovedaDeckComponent: ImageBovedaDeckComponent;
   @ViewChild('imageSideDeck') ImageSidedeckComponent: ImageSidedeckComponent;
 
-  generarImagen() {
+  async generarImagen() {
     let decklist: string;
     let nombreCompleto: string;
 
-    Swal.fire({
-      title: 'Pon un nombre para tu decklist',
-      input: 'text',
-      background: '#2e3031',
-      color: '#fff',
-      inputAttributes: {
-        autocapitalize: 'off',
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      showLoaderOnConfirm: true,
-      allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        decklist = result.value;
-
-        Swal.fire({
-          title: 'Cuál es tu nombre y apellido?',
-          input: 'text',
-          background: '#2e3031',
-          color: '#fff',
-          inputAttributes: {
-            autocapitalize: 'off',
-          },
-          showCancelButton: true,
-          confirmButtonText: 'Guardar',
-          showLoaderOnConfirm: true,
-          allowOutsideClick: () => !Swal.isLoading(),
-        }).then((result) => {
-          if (result.isConfirmed) {
-            nombreCompleto = result.value;
-
-            const image1Promise = new Promise<string>(resolve => {
-              this.onImageGenerated = (imageUrl: string) => {
-                  resolve(imageUrl);
-              };
-              this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
-          });
-
-          const image2Promise = new Promise<string>(resolve => {
-              this.onImageGeneratedBoveda = (imageUrl: string) => {
-                  resolve(imageUrl);
-              };
-              this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
-          });
-
-          const image3Promise = new Promise<string>(resolve => {
-              this.onImageGeneratedSideDeck = (imageUrl: string) => {
-                  resolve(imageUrl);
-              };
-              this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
-          });
-
-          // Esperar a que todas las imágenes estén generadas
-          Promise.all([image1Promise, image2Promise, image3Promise])
-              .then(([img1, img2, img3]) => {
-                  this.combinaImagenes(img1, img2, img3);
-                  this.banderaImagenGenerada = true;
-
-                  Swal.fire(
-                    'Imagen generada correctamente',
-                    `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`,
-                    `success`
-                  );
-              });
-
-          }
+    decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
+    if (decklist !== undefined) {
+      nombreCompleto = await this.presentAlertInput('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
+      if (nombreCompleto !== undefined) {
+        const image1Promise = new Promise<string>((resolve) => {
+          this.onImageGenerated = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
         });
+
+        const image2Promise = new Promise<string>((resolve) => {
+          this.onImageGeneratedBoveda = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
+        });
+
+        const image3Promise = new Promise<string>((resolve) => {
+          this.onImageGeneratedSideDeck = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
+        });
+
+        // Esperar a que todas las imágenes estén generadas
+        Promise.all([image1Promise, image2Promise, image3Promise])
+          .then(([img1, img2, img3]) => {
+            this.combinaImagenes(img1, img2, img3);
+            this.banderaImagenGenerada = true;
+
+            this.presentAlert(
+              'Imagen generada correctamente',
+              `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`
+            );
+          });
       }
-    });
+    }
   }
+
+
+
 
   onImageGenerated(imageUrl: string) {
     this.imagenGenerada = imageUrl;
@@ -197,16 +169,7 @@ export class DecklistIndividualPage implements OnInit {
   }
 
 
-  esMovil: boolean = false;
-
-  detectarMovil(): boolean {
-    // Un simple chequeo para dispositivos móviles basado en el ancho de la ventana. Ajusta el valor según tus necesidades.
-    return window.innerWidth <= 800;
-  }
-
-
   ngOnInit(): void {
-    this.esMovil = this.detectarMovil();
     this.activatedRoute.params.subscribe((params) => {
       this.decklistId = params['id'];
 
@@ -519,13 +482,18 @@ export class DecklistIndividualPage implements OnInit {
         const cantidadPrincipal = this.getCantidad(carta, this.boveda);
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
         if (cantidadPrincipal + cantidadSide > 0) {
-          Swal.fire({
-            icon: 'error',
-            title: 'No tan rápido, general',
-            text: 'No puedes agregar a tu Bóveda más de 1 copia del mismo Tesoro!',
-            background: '#2e3031',
-            color: '#fff',
-          });
+
+          (async () => {
+            const alert = await this.alertController.create({
+              header: 'No tan rápido, general',
+              message: 'No puedes agregar a tu Bóveda más de 1 copia del mismo Tesoro!',
+              buttons: ['OK'],
+              cssClass: 'my-custom-class',
+            });
+
+            await alert.present();
+          })();
+
           return;
         }
 
@@ -543,13 +511,17 @@ export class DecklistIndividualPage implements OnInit {
         const cantidadPrincipal = this.getCantidad(carta, this.reino);
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
         if (cantidadPrincipal + cantidadSide > 3) {
-          Swal.fire({
-            icon: 'error',
-            title: 'No tan rápido, general',
-            text: 'No puedes agregar a tu Reino más de 4 copias de la misma carta!',
-            background: '#2e3031',
-            color: '#fff',
-          });
+
+          (async () => {
+            const alert = await this.alertController.create({
+              header: 'No tan rápido, general',
+              message: 'No puedes agregar a tu Reino más de 4 copias de la misma carta!',
+              buttons: ['OK'],
+              cssClass: 'my-custom-class',
+            });
+
+            await alert.present();
+          })();
           return;
         }
 
@@ -572,13 +544,18 @@ export class DecklistIndividualPage implements OnInit {
         const cantidadPrincipal = this.getCantidad(carta, this.boveda);
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
         if (cantidadPrincipal + cantidadSide > 0) {
-          Swal.fire({
-            icon: 'error',
-            title: 'No tan rápido, general',
-            text: 'No puedes agregar a tu Side Deck más de 1 copia del mismo Tesoro!',
-            background: '#2e3031',
-            color: '#fff',
-          });
+
+          (async () => {
+            const alert = await this.alertController.create({
+              header: 'No tan rápido, general',
+              message: 'No puedes agregar a tu Side más de 1 copia del mismo Tesoro!',
+              buttons: ['OK'],
+              cssClass: 'my-custom-class',
+            });
+
+            await alert.present();
+          })();
+
           return;
         }
 
@@ -587,13 +564,18 @@ export class DecklistIndividualPage implements OnInit {
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
 
         if (cantidadPrincipal + cantidadSide > 3) {
-          Swal.fire({
-            icon: 'error',
-            title: 'No tan rápido, general',
-            text: 'No puedes agregar a tu Reino más de 4 copias de la misma carta!',
-            background: '#2e3031',
-            color: '#fff',
-          });
+
+          (async () => {
+            const alert = await this.alertController.create({
+              header: 'No tan rápido, general',
+              message: 'No puedes agregar a tu Reino más de 4 copias de la misma carta!',
+              buttons: ['OK'],
+              cssClass: 'my-custom-class',
+            });
+
+            await alert.present();
+          })();
+
           return;
         }
       }
@@ -626,53 +608,61 @@ export class DecklistIndividualPage implements OnInit {
     this.banderaLista = !this.banderaLista;
 
     if (this.banderaLista) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Cambiando!',
-        text: 'Ahora las cartas que clickees estarás agregandolas a tu mazo principal',
-        background: '#2e3031',
-        color: '#fff',
-      });
+      (async () => {
+        const alert = await this.alertController.create({
+          header: 'Cambiando!',
+          message: 'Ahora las cartas que clickees estarás agregandolas a tu mazo principal',
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+
+        await alert.present();
+      })();
+
     } else {
-      Swal.fire({
-        icon: 'info',
-        title: 'Cambiando!',
-        text: 'Ahora las cartas que clickees estarás agregandolas a tu Side Deck',
-        background: '#2e3031',
-        color: '#fff',
-      });
+      (async () => {
+        const alert = await this.alertController.create({
+          header: 'Cambiando!',
+          message: 'Ahora las cartas que clickees estarás agregandolas a tu Sidedeck',
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+
+        await alert.present();
+      })();
     }
   }
 
-  guardarDecklist() {
-
+  async guardarDecklist() {
     let sagrados: number = 0;
 
     for (const item of this.boveda) {
-        if (item.tipo.nombreTipo === 'TESORO - SAGRADO') {
-            sagrados++;
-        }
+      if (item.tipo.nombreTipo === 'TESORO - SAGRADO') {
+        sagrados++;
+      }
     }
 
     if (sagrados > 3) {
-        Swal.fire({
-            icon: 'error',
-            title: 'La cantidad de cartas está mal!',
-            text: 'No puedes tener más de 3 tesoros sagrados en tu bóveda.',
-            background: '#2e3031',
-            color: '#fff',
-        });
-        return;
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'No puedes tener más de 3 tesoros sagrados en tu decklist',
+        buttons: ['OK'],
+        cssClass: 'my-custom-class',
+      });
+
+      await alert.present();
+      return;
     }
 
     if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 10) {
-      Swal.fire({
-        icon: 'error',
-        title: 'La cantidad de cartas está mal!',
-        text: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
-        background: '#2e3031',
-        color: '#fff',
+      const alert = await this.alertController.create({
+        header: 'Error',
+        message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
+        buttons: ['OK'],
+        cssClass: 'my-custom-class',
       });
+
+      await alert.present();
       return;
     }
 
@@ -703,87 +693,77 @@ export class DecklistIndividualPage implements OnInit {
       deck.sidedeck.push(deckListCarta);
     });
 
-    Swal.fire({
-      title:
-        'Guarda la URL de la imagen que quieres como portada para tu decklist (recomendamos usar un uploader de imagen como https://postimages.org',
-      input: 'text',
-      background: '#2e3031',
-      color: '#fff',
-      inputAttributes: {
-        autocapitalize: 'off',
-      },
-      showCancelButton: true,
-      confirmButtonText: 'Guardar',
-      showLoaderOnConfirm: true,
-      allowOutsideClick: () => !Swal.isLoading(),
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deck.portadaDecklist = result.value;
-        Swal.fire({
-          title: 'Pon un nombre para tu decklist)',
-          input: 'text',
-          background: '#2e3031',
-          color: '#fff',
-          inputAttributes: {
-            autocapitalize: 'off',
-          },
-          showCancelButton: true,
-          confirmButtonText: 'Guardar',
-          showLoaderOnConfirm: true,
-          allowOutsideClick: () => !Swal.isLoading(),
-        }).then((result) => {
-          if (result.isConfirmed) {
-            deck.nombreDecklist = result.value;
-            this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
-              if (!this.banderaEdicion) {
-                this.conexion.crearDecklistJugador(deck, usuario.id).subscribe(
-                  (dato) => {
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Guardado!',
-                      text: `Tu decklist ${result.value} ha sido guardada.`,
-                      background: '#2e3031',
-                      color: '#fff',
-                    });
-                  },
-                  (error) => {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Error!',
-                      text: 'Algo salió mal',
-                      background: '#2e3031',
-                      color: '#fff',
-                    });
-                  }
-                );
-              } else {
-                this.conexion.putDecklist(this.decklistId, deck).subscribe(
-                  (dato) => {
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Guardado!',
-                      text: `Tu decklist ${result.value} ha sido actualizada.`,
-                      background: '#2e3031',
-                      color: '#fff',
-                    });
-                  },
-                  (error) => {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Error!',
-                      text: 'Algo salió mal',
-                      background: '#2e3031',
-                      color: '#fff',
-                    });
-                  }
-                );
+    const portadaDecklist = await this.presentAlertInput('Ingresa una imagen', 'Guarda la URL de la imagen que quieres como portada para tu decklist (recomendamos usar un uploader de imagen como https://postimages.org)');
+    if (portadaDecklist !== undefined) {
+      deck.portadaDecklist = portadaDecklist;
+
+      const nombreDecklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
+      if (nombreDecklist !== undefined) {
+        deck.nombreDecklist = nombreDecklist;
+
+        this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
+          if (!this.banderaEdicion) {
+            this.conexion.crearDecklistJugador(deck, usuario.id).subscribe(
+              (dato) => {
+                this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido guardada.`);
+              },
+              (error) => {
+                this.presentAlert('Error!', 'Algo salió mal');
               }
-            });
+            );
+          } else {
+            this.conexion.putDecklist(this.decklistId, deck).subscribe(
+              (dato) => {
+                this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido actualizada.`);
+              },
+              (error) => {
+                this.presentAlert('Error!', 'Algo salió mal');
+              }
+            );
           }
         });
       }
+    }
+  }
+
+  async presentAlertInput(header: string, message: string) {
+    return new Promise<string | undefined>((resolve) => {
+      this.alertController.create({
+        header,
+        message,
+        inputs: [
+          {
+            name: 'input',
+            type: 'text',
+            placeholder: 'Ingresa aquí',
+          },
+        ],
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            handler: () => resolve(undefined),
+          },
+          {
+            text: 'Guardar',
+            handler: (data) => resolve(data.input),
+          },
+        ],
+      }).then(alert => alert.present());
     });
   }
+
+  async presentAlert(header: string, message: string) {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      buttons: ['OK'],
+      cssClass: 'my-custom-class',
+    });
+
+    await alert.present();
+  }
+
 
   copyToClipboard() {
     let str = 'Reino: (total: ' + this.getTotalCartas(this.reino) + ')\n';
@@ -808,25 +788,18 @@ export class DecklistIndividualPage implements OnInit {
     });
 
     navigator.clipboard.writeText(str).then(
-      function () {
-        Swal.fire({
-          icon: 'success',
-          title: 'Copiado!',
-          text: 'Ya tienes toda la lista copiada en tu portapapeles!',
-          background: '#2e3031',
-          color: '#fff',
+      async () => {
+        const alert = await this.alertController.create({
+          header: 'Copiado!',
+          message: 'Ya tienes toda la lista copiada en tu portapapeles!',
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
         });
+
+        await alert.present();
       },
-      function (err) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Esto es culpa del rey!',
-          text: 'Algo salió mal, no se pudo copiar la lista',
-          background: '#2e3031',
-          color: '#fff',
-        });
-      }
     );
+
   }
 
   onImageLoad(event: Event) {
@@ -834,6 +807,14 @@ export class DecklistIndividualPage implements OnInit {
     const elementRef = new ElementRef(imageElement);
     elementRef.nativeElement.classList.add('fade-in');
   }
+
+
+  opcionesVisibles = false;
+
+  toggleOpciones() {
+    this.opcionesVisibles = !this.opcionesVisibles;
+  }
+
 }
 
 

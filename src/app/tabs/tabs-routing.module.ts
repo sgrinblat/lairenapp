@@ -29,7 +29,16 @@ const routes: Routes = [
 
       {
         path: 'tab3',
-        loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
+        children: [
+          {
+            path: '',
+            loadChildren: () => import('../tab3/tab3.module').then(m => m.Tab3PageModule)
+          },
+          {
+            path: 'decklist/:id',
+            loadChildren: () => import('../tab3/pages/decklist-individual/decklist-individual.module').then(m => m.DecklistIndividualPageModule)
+          }
+        ]
       },
       {
         path: '',

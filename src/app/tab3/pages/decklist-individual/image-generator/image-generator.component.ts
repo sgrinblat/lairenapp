@@ -2,9 +2,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import html2canvas from 'html2canvas';
 import { Carta } from 'src/app/objetos/carta';
 
-
-import Swal from 'sweetalert2';
-
 @Component({
   selector: 'app-image-generator',
   templateUrl: './image-generator.component.html',
@@ -22,7 +19,7 @@ export class ImageGeneratorComponent {
     const contenedor = document.createElement('div');
     contenedor.style.width = '1160px';
     contenedor.style.height = '1000px';
-    contenedor.style.backgroundImage = 'url("/assets/images/texture.png")';
+    contenedor.style.backgroundImage = 'url("../../../../../../assets/fondos/texture.png")';
     contenedor.style.backgroundSize = 'cover'; // La imagen cubre todo el contenedor
     contenedor.style.position = 'relative';
     contenedor.style.overflow = 'hidden';
@@ -132,7 +129,7 @@ export class ImageGeneratorComponent {
     for (const [nombreCarta, repeticiones] of Object.entries(
       mapaDeRepeticiones
     )) {
-      const rutaImagenLocal = `assets/images/decklists/${nombreCarta}.jpg`;
+      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.jpg`;
 
       // Creamos el contenedor para la carta y su etiqueta
       const contenedorCarta = document.createElement('div');

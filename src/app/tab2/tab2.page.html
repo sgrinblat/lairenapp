@@ -67,17 +67,21 @@
   </ion-grid>
 
   <ion-grid
-    *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null && selectedCoste === null && (searchText === '' || searchText === null)">
-    <ion-row *ngFor="let card of cartas">
-      <ion-col size="12">
+  *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null && selectedCoste === null && (searchText === '' || searchText === null)">
+  <ion-row *ngFor="let card of cartas">
+    <ion-col size="12" class="carta-container">
+      <div class="carta-contenido">
         <ion-img class="carta" [src]="card.urlImagen" (click)="visualizarCarta(card.idCarta)"></ion-img>
-        <div class="carta-texto">
+        <div>
           <p>{{acortarTexto(card.textoCarta)}}</p>
           <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
         </div>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+      </div>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+
 
   <ion-grid
     *ngIf="filteredCartas.length === 0 && (selectedRareza || selectedExpansion || selectedTipo || selectedCoste || searchText)">

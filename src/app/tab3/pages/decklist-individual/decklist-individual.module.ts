@@ -7,6 +7,9 @@ import { IonicModule } from '@ionic/angular';
 import { DecklistIndividualPageRoutingModule } from './decklist-individual-routing.module';
 
 import { DecklistIndividualPage } from './decklist-individual.page';
+import { ImageGeneratorComponent } from './image-generator/image-generator.component';
+import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
+import { ImageSidedeckComponent } from './image-sidedeck/image-sidedeck.component';
 
 @NgModule({
   imports: [
@@ -15,6 +18,11 @@ import { DecklistIndividualPage } from './decklist-individual.page';
     IonicModule,
     DecklistIndividualPageRoutingModule
   ],
-  declarations: [DecklistIndividualPage]
+  declarations: [
+    DecklistIndividualPage,
+    ImageGeneratorComponent,
+    ImageBovedaDeckComponent,
+    ImageSidedeckComponent
+  ]
 })
 export class DecklistIndividualPageModule {}
