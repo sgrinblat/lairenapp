@@ -10,7 +10,12 @@ import { Expansion } from 'src/app/objetos/expansion';
 import { Usuario } from 'src/app/objetos/usuario';
 import { ConexionService } from 'src/app/services/conexion.service';
 
+import { encode } from 'base64-arraybuffer';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+
+import { Plugins, PermissionState} from '@capacitor/core';
+import { Platform } from '@ionic/angular';
+const { Permissions } = Plugins;
 
 import { AlertController } from '@ionic/angular';
 import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
@@ -55,6 +60,7 @@ export class DecklistIndividualPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private route: Router,
     private alertController: AlertController,
+    private platform: Platform,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.reino = new Array<Carta>();
@@ -170,21 +176,69 @@ export class DecklistIndividualPage implements OnInit {
   }
 
   async downloadAndSaveImage(imageUrl: string, imageName: string) {
+    // Verifica si la aplicación se está ejecutando en un dispositivo real
+    if (!this.isRealDevice()) {
+      console.error('This function can only be executed on a real device');
+      return;
+    }
+
     // Descarga la imagen
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+    const base64 = this.arrayBufferToBase64(arrayBuffer);
 
-    // Guarda la imagen en el almacenamiento local del dispositivo
-    await Filesystem.writeFile({
-      path: imageName,
+    const timestamp = new Date().getTime();
+    const uniqueImageName = `${imageName}_${timestamp}.jpg`;
+
+    // Guarda la imagen en el almacenamiento externo del dispositivo
+    const result = await Filesystem.writeFile({
+      path: 'Download/' + uniqueImageName,
       data: base64,
-      directory: Directory.Data,
+      directory: Directory.ExternalStorage,
     });
 
-    console.log('Image saved');
+    console.log('Image saved at', result.uri);
+    this.presentAlert('Descargado!', 'Tu decklist fue descargada, podes verla en tus archivos recientes');
   }
+
+  isRealDevice(): boolean {
+    return this.platform.is('cordova') || this.platform.is('capacitor');
+  }
+
+  arrayBufferToBase64(buffer: ArrayBuffer): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+
+
+  // async downloadAndSaveImage(imageUrl: string, imageName: string) {
+  //   // Descarga la imagen
+  //   const response = await fetch(imageUrl);
+  //   const blob = await response.blob();
+  //   const arrayBuffer = await blob.arrayBuffer();
+  //   const base64 = encode(arrayBuffer);
+
+  //   // Guarda la imagen en el almacenamiento local del dispositivo
+  //   const result = await Filesystem.writeFile({
+  //     path: 'Download/' + imageName,
+  //     data: base64,
+  //     directory: Directory.ExternalStorage,
+  //   });
+
+
+  //   console.log('Image saved');
+  //   console.log('Image saved at', result.uri);
+  // }
+
+
+
 
 
 

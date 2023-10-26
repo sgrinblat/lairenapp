@@ -65,7 +65,7 @@ export class Tab1Page {
                   console.log("lo lograste!!!")
                   this.presentAlert('Éxito', 'Inicio de sesión exitoso');
                   this.conexion.loginStatus.next(true);
-
+                  this.route.navigate(['/tabs/tab2']);
                 } else {
                   this.presentAlert('Fallido', 'No has verificado tu mail');
                   console.log("el alert del mail")
