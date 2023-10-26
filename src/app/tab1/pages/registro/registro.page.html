@@ -1,0 +1,86 @@
+<ion-content class="ion-padding">
+  <ion-grid class="ion-text-center">
+    <ion-row class="ion-justify-content-center ion-align-items-center" style="height: 100%;">
+      <ion-col size-md="6" size-lg="5" size-xl="4">
+        <h2 class="ion-text-white">Registro de un nuevo usuario</h2>
+        <form [formGroup]="contactForm">
+          <ion-list lines="full">
+
+            <!-- Campo de nombre de usuario -->
+            <ion-item>
+              <ion-label position="floating" color="light">Username</ion-label>
+              <ion-input type="text" placeholder="Ingrese su usuario"
+                        formControlName="formularioUsernameUsuario"></ion-input>
+            </ion-item>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioUsernameUsuario')?.touched && contactForm.get('formularioUsernameUsuario')?.errors?.['required']">
+              *El campo de username es obligatorio
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioUsernameUsuario')?.touched && contactForm.get('formularioUsernameUsuario')?.errors?.['minlength']">
+              *El campo de username debe contener al menos {{contactForm.get('formularioUsernameUsuario')?.errors?.['minlength'].requiredLength}} letras
+            </ion-text>
+
+            <!-- Campo de contraseña -->
+            <ion-item>
+              <ion-label position="floating" color="light">Contraseña</ion-label>
+              <ion-input type="password" placeholder="Ingrese su contraseña"
+                        formControlName="formularioPasswordUsuario"></ion-input>
+            </ion-item>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['required']">
+              *El campo de contraseña es obligatorio
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['minlength']">
+              *El campo de contraseña debe contener al menos {{contactForm.get('formularioPasswordUsuario')?.errors?.['minlength'].requiredLength}} letras
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['passwordStrength']">
+              *El campo de contraseña debe tener mínimo una mayúscula y un número
+            </ion-text>
+
+            <!-- Campo de Email -->
+            <ion-item>
+              <ion-label position="floating" color="light">Email</ion-label>
+              <ion-input type="email" placeholder="Ingrese su email"
+                        formControlName="formularioEmailUsuario"></ion-input>
+            </ion-item>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioEmailUsuario')?.touched && contactForm.get('formularioEmailUsuario')?.errors?.['required']">
+              *El campo de Email es obligatorio
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioEmailUsuario')?.touched && contactForm.get('formularioEmailUsuario')?.errors?.['minlength']">
+              *El campo de Email debe contener al menos {{contactForm.get('formularioEmailUsuario')?.errors?.['minlength'].requiredLength}} letras
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioEmailUsuario')?.touched && contactForm.get('formularioEmailUsuario')?.errors?.['email']">
+              *El campo de Email debe ser un email
+            </ion-text>
+
+            <!-- Campo de Nombre -->
+            <ion-item>
+              <ion-label position="floating" color="light">Nombre</ion-label>
+              <ion-input type="text" placeholder="Ingrese su nombre"
+                        formControlName="formularioNombreUsuario"></ion-input>
+            </ion-item>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['required']">
+              *El campo de Nombre es obligatorio
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['minlength']">
+              *El campo de Nombre debe contener al menos {{contactForm.get('formularioNombreUsuario')?.errors?.['minlength'].requiredLength}} letras
+            </ion-text>
+
+            <!-- Campo de Apellido -->
+            <ion-item>
+              <ion-label position="floating" color="light">Apellido</ion-label>
+              <ion-input type="text" placeholder="Ingrese su apellido"
+                        formControlName="formularioApellidoUsuario"></ion-input>
+            </ion-item>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioApellidoUsuario')?.touched && contactForm.get('formularioApellidoUsuario')?.errors?.['required']">
+              *El campo de Apellido es obligatorio
+            </ion-text>
+            <ion-text color="danger" *ngIf="contactForm.get('formularioApellidoUsuario')?.touched && contactForm.get('formularioApellidoUsuario')?.errors?.['minlength']">
+              *El campo de Apellido debe contener al menos {{contactForm.get('formularioApellidoUsuario')?.errors?.['minlength'].requiredLength}} letras
+            </ion-text>
+
+          </ion-list>
+          <ion-button expand="full" (click)="registrarse()">Registrarse</ion-button>
+        </form>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>

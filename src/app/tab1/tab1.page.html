@@ -1,32 +1,6 @@
-<!-- <ion-content class="ion-padding">
+<ion-content class="ion-padding centered-container">
 
-  <div class="centered-container">
-
-    <div class="login-container">
-
-      <ion-list>
-        <ion-item>
-          <ion-label position="floating">Nombre de usuario</ion-label>
-          <ion-input type="text"></ion-input>
-        </ion-item>
-
-        <ion-item>
-          <ion-label position="floating">Contraseña</ion-label>
-          <ion-input type="password"></ion-input>
-        </ion-item>
-      </ion-list>
-
-      <ion-button expand="block">Iniciar Sesión</ion-button>
-    </div>
-  </div>
-
-</ion-content> -->
-
-
-
-<ion-content class="ion-padding">
-
-    <form [formGroup]="contactForm">
+    <form class="center-content" [formGroup]="contactForm">
       <ion-grid>
         <ion-row>
 
@@ -34,8 +8,7 @@
           <ion-col size="12" class="ion-margin">
             <ion-item lines="full">
               <ion-label position="floating" color="light">Username</ion-label>
-              <ion-input type="text" placeholder="Ingrese su usuario"
-                        formControlName="formularioNombreUsuario"></ion-input>
+              <ion-input type="text" placeholder="Ingrese su usuario" formControlName="formularioNombreUsuario"></ion-input>
             </ion-item>
             <ion-text color="danger" *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['required']">
               *El campo de nombre es obligatorio
@@ -63,7 +36,7 @@
           <ion-col size="12" class="ion-margin-top">
             <ion-button expand="block" (click)="onSubmit()" [disabled]="contactForm.invalid">Iniciar sesión</ion-button>
             <ion-button expand="block" color="danger" (click)="recuperarPass()" class="ion-margin-top">Recuperar contraseña</ion-button>
-            <ion-button expand="block" routerLink="/registrarse" class="ion-margin-top">Registrarse</ion-button>
+            <ion-button expand="block" routerLink="/tabs/tab1/registro" class="ion-margin-top">Registrarse</ion-button>
           </ion-col>
 
         </ion-row>

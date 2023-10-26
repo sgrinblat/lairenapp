@@ -75,172 +75,6 @@ export class DecklistIndividualPage implements OnInit {
   @ViewChild('imageBoveda') ImageBovedaDeckComponent: ImageBovedaDeckComponent;
   @ViewChild('imageSideDeck') ImageSidedeckComponent: ImageSidedeckComponent;
 
-  async generarImagen() {
-    let decklist: string;
-    let nombreCompleto: string;
-
-    decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
-    if (decklist !== undefined) {
-      nombreCompleto = await this.presentAlertInput('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
-      if (nombreCompleto !== undefined) {
-        const image1Promise = new Promise<string>((resolve) => {
-          this.onImageGenerated = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        const image2Promise = new Promise<string>((resolve) => {
-          this.onImageGeneratedBoveda = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        const image3Promise = new Promise<string>((resolve) => {
-          this.onImageGeneratedSideDeck = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        // Esperar a que todas las imágenes estén generadas
-        Promise.all([image1Promise, image2Promise, image3Promise])
-          .then(([img1, img2, img3]) => {
-            this.combinaImagenes(img1, img2, img3);
-            this.banderaImagenGenerada = true;
-
-            this.presentAlert(
-              'Imagen generada correctamente',
-              `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`
-            );
-          });
-      }
-    }
-  }
-
-
-
-
-  onImageGenerated(imageUrl: string) {
-    this.imagenGenerada = imageUrl;
-  }
-
-  onImageGeneratedBoveda(imageUrl: string) {
-      this.imagenGeneradaBoveda = imageUrl;
-  }
-
-  onImageGeneratedSideDeck(imageUrl: string) {
-      this.imagenGeneradaSideDeck = imageUrl;
-  }
-
-
-  combinaImagenes(img1Src: string, img2Src: string, img3Src: string) {
-    let canvas = document.createElement('canvas');
-    let ctx = canvas.getContext('2d');
-
-    let img1 = new Image();
-    let img2 = new Image();
-    let img3 = new Image();
-
-    let img1Promise = new Promise((resolve, reject) => {
-        img1.onload = resolve;
-        img1.onerror = reject;
-        img1.src = img1Src;
-    });
-
-    let img2Promise = new Promise((resolve, reject) => {
-        img2.onload = resolve;
-        img2.onerror = reject;
-        img2.src = img2Src;
-    });
-
-    let img3Promise = new Promise((resolve, reject) => {
-        img3.onload = resolve;
-        img3.onerror = reject;
-        img3.src = img3Src;
-    });
-
-    Promise.all([img1Promise, img2Promise, img3Promise]).then(() => {
-        canvas.width = img1.width;  // Asume que todas las imágenes tienen el mismo ancho
-        canvas.height = img1.height + img2.height + img3.height;
-
-        ctx.drawImage(img1, 0, 0);
-        ctx.drawImage(img2, 0, img1.height);
-        ctx.drawImage(img3, 0, img1.height + img2.height);
-
-        this.imagenCombinada = canvas.toDataURL('image/png');
-    }).catch(error => {
-        console.error("Hubo un error cargando las imágenes: ", error);
-    });
-  }
-
-  async downloadAndSaveImage(imageUrl: string, imageName: string) {
-    // Verifica si la aplicación se está ejecutando en un dispositivo real
-    if (!this.isRealDevice()) {
-      console.error('This function can only be executed on a real device');
-      return;
-    }
-
-    // Descarga la imagen
-    const response = await fetch(imageUrl);
-    const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-    const base64 = this.arrayBufferToBase64(arrayBuffer);
-
-    const timestamp = new Date().getTime();
-    const uniqueImageName = `${imageName}_${timestamp}.jpg`;
-
-    // Guarda la imagen en el almacenamiento externo del dispositivo
-    const result = await Filesystem.writeFile({
-      path: 'Download/' + uniqueImageName,
-      data: base64,
-      directory: Directory.ExternalStorage,
-    });
-
-    console.log('Image saved at', result.uri);
-    this.presentAlert('Descargado!', 'Tu decklist fue descargada, podes verla en tus archivos recientes');
-  }
-
-  isRealDevice(): boolean {
-    return this.platform.is('cordova') || this.platform.is('capacitor');
-  }
-
-  arrayBufferToBase64(buffer: ArrayBuffer): string {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    const len = bytes.byteLength;
-    for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return window.btoa(binary);
-  }
-
-
-
-  // async downloadAndSaveImage(imageUrl: string, imageName: string) {
-  //   // Descarga la imagen
-  //   const response = await fetch(imageUrl);
-  //   const blob = await response.blob();
-  //   const arrayBuffer = await blob.arrayBuffer();
-  //   const base64 = encode(arrayBuffer);
-
-  //   // Guarda la imagen en el almacenamiento local del dispositivo
-  //   const result = await Filesystem.writeFile({
-  //     path: 'Download/' + imageName,
-  //     data: base64,
-  //     directory: Directory.ExternalStorage,
-  //   });
-
-
-  //   console.log('Image saved');
-  //   console.log('Image saved at', result.uri);
-  // }
-
-
-
-
-
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {
@@ -886,6 +720,147 @@ export class DecklistIndividualPage implements OnInit {
 
   toggleOpciones() {
     this.opcionesVisibles = !this.opcionesVisibles;
+  }
+
+  async generarImagen() {
+    let decklist: string;
+    let nombreCompleto: string;
+
+    decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
+    if (decklist !== undefined) {
+      nombreCompleto = await this.presentAlertInput('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
+      if (nombreCompleto !== undefined) {
+        const image1Promise = new Promise<string>((resolve) => {
+          this.onImageGenerated = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
+        });
+
+        const image2Promise = new Promise<string>((resolve) => {
+          this.onImageGeneratedBoveda = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
+        });
+
+        const image3Promise = new Promise<string>((resolve) => {
+          this.onImageGeneratedSideDeck = (imageUrl: string) => {
+            resolve(imageUrl);
+          };
+          this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
+        });
+
+        // Esperar a que todas las imágenes estén generadas
+        Promise.all([image1Promise, image2Promise, image3Promise])
+          .then(([img1, img2, img3]) => {
+            this.combinaImagenes(img1, img2, img3);
+            this.banderaImagenGenerada = true;
+
+            this.presentAlert(
+              'Imagen generada correctamente',
+              `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`
+            );
+          });
+      }
+    }
+  }
+
+
+
+
+  onImageGenerated(imageUrl: string) {
+    this.imagenGenerada = imageUrl;
+  }
+
+  onImageGeneratedBoveda(imageUrl: string) {
+      this.imagenGeneradaBoveda = imageUrl;
+  }
+
+  onImageGeneratedSideDeck(imageUrl: string) {
+      this.imagenGeneradaSideDeck = imageUrl;
+  }
+
+
+  combinaImagenes(img1Src: string, img2Src: string, img3Src: string) {
+    let canvas = document.createElement('canvas');
+    let ctx = canvas.getContext('2d');
+
+    let img1 = new Image();
+    let img2 = new Image();
+    let img3 = new Image();
+
+    let img1Promise = new Promise((resolve, reject) => {
+        img1.onload = resolve;
+        img1.onerror = reject;
+        img1.src = img1Src;
+    });
+
+    let img2Promise = new Promise((resolve, reject) => {
+        img2.onload = resolve;
+        img2.onerror = reject;
+        img2.src = img2Src;
+    });
+
+    let img3Promise = new Promise((resolve, reject) => {
+        img3.onload = resolve;
+        img3.onerror = reject;
+        img3.src = img3Src;
+    });
+
+    Promise.all([img1Promise, img2Promise, img3Promise]).then(() => {
+        canvas.width = img1.width;  // Asume que todas las imágenes tienen el mismo ancho
+        canvas.height = img1.height + img2.height + img3.height;
+
+        ctx.drawImage(img1, 0, 0);
+        ctx.drawImage(img2, 0, img1.height);
+        ctx.drawImage(img3, 0, img1.height + img2.height);
+
+        this.imagenCombinada = canvas.toDataURL('image/png');
+    }).catch(error => {
+        console.error("Hubo un error cargando las imágenes: ", error);
+    });
+  }
+
+  async downloadAndSaveImage(imageUrl: string, imageName: string) {
+    // Verifica si la aplicación se está ejecutando en un dispositivo real
+    if (!this.isRealDevice()) {
+      console.error('This function can only be executed on a real device');
+      return;
+    }
+
+    // Descarga la imagen
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const base64 = this.arrayBufferToBase64(arrayBuffer);
+
+    const timestamp = new Date().getTime();
+    const uniqueImageName = `${imageName}_${timestamp}.jpg`;
+
+    // Guarda la imagen en el almacenamiento externo del dispositivo
+    const result = await Filesystem.writeFile({
+      path: 'Download/' + uniqueImageName,
+      data: base64,
+      directory: Directory.ExternalStorage,
+    });
+
+    console.log('Image saved at', result.uri);
+    this.presentAlert('Descargado!', 'Tu decklist fue descargada, podes verla en tus archivos recientes');
+  }
+
+  isRealDevice(): boolean {
+    return this.platform.is('cordova') || this.platform.is('capacitor');
+  }
+
+  arrayBufferToBase64(buffer: ArrayBuffer): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
   }
 
 }

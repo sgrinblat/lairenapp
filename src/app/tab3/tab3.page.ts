@@ -18,14 +18,23 @@ export class Tab3Page {
   defaultImage = '../../assets/fondos/mente-mejor.jpg';
 
 
-  constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private alertController: AlertController) {
+  constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private alertController: AlertController) {}
 
-  }
+  usuarioLogeado: boolean = false;  // Variable para rastrear si hay un usuario logeado
 
   ngOnInit() {
-
     this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
-      this.obtenerDecklists(usuario.id);
+      if (usuario && usuario.id) {  // Verifica si el objeto usuario y su id existen
+        this.usuarioLogeado = true;  // Actualiza la variable a true si hay un usuario logeado
+        this.obtenerDecklists(usuario.id);
+      } else {
+        this.usuarioLogeado = false;  // Actualiza la variable a false si no hay un usuario logeado
+        // Aquí puedes también actualizar el mensaje en el front para informar que no hay un usuario logeado
+      }
+    }, error => {
+      this.usuarioLogeado = false;  // Actualiza la variable a false si ocurre un error
+      // Opcionalmente, maneja el error (ej., mostrar un mensaje de error en la UI)
+      console.error('Error obteniendo el usuario actual:', error);
     });
   }
 

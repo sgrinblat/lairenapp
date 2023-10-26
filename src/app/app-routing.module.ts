@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 import { CartaIndividualPageModule } from './tab2/pages/carta-individual/carta-individual.module';
+import { Tab1PageModule } from './tab1/tab1.module';
 
 const routes: Routes = [
   {

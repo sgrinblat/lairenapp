@@ -6,7 +6,15 @@ const routes: Routes = [
   {
     path: '',
     component: Tab1Page,
+  },  {
+    path: 'registro',
+    loadChildren: () => import('./pages/registro/registro.module').then( m => m.RegistroPageModule)
+  },
+  {
+    path: 'panelusuario',
+    loadChildren: () => import('./pages/panelusuario/panelusuario.module').then( m => m.PanelusuarioPageModule)
   }
+
 ];
 
 @NgModule({

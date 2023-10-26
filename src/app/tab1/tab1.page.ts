@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -24,6 +24,7 @@ export class Tab1Page {
     private activatedRoute: ActivatedRoute,
     private route: Router,
     private alertController: AlertController,
+    private cdr: ChangeDetectorRef,
   ) {
     this.contactForm = fb.group({
       formularioNombreUsuario: [
@@ -62,10 +63,10 @@ export class Tab1Page {
                 if (user.emailVerified) {
                   this.conexion.setUser(userDetails);
                   localStorage.setItem('location', '0');
-                  console.log("lo lograste!!!")
+                  this.cdr.detectChanges();
                   this.presentAlert('Éxito', 'Inicio de sesión exitoso');
                   this.conexion.loginStatus.next(true);
-                  this.route.navigate(['/tabs/tab2']);
+                  this.route.navigate(['/tabs/tab3']);
                 } else {
                   this.presentAlert('Fallido', 'No has verificado tu mail');
                   console.log("el alert del mail")
