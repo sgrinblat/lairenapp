@@ -1,46 +1,54 @@
-<ion-content class="ion-padding centered-container">
+<ion-content class="ion-padding">
 
-    <form class="center-content" [formGroup]="contactForm">
-      <ion-grid>
-        <ion-row>
+  <form [formGroup]="contactForm">
+    <ion-grid >
+      <ion-row >
+        <ion-col size="12" size-md="8" offset-md="2">
 
-          <!-- Campo de nombre de usuario -->
-          <ion-col size="12" class="ion-margin">
-            <ion-item lines="full">
-              <ion-label position="floating" color="light">Username</ion-label>
-              <ion-input type="text" placeholder="Ingrese su usuario" formControlName="formularioNombreUsuario"></ion-input>
+          <div class="campos">
+            <ion-item lines="full" class="ion-margin-bottom">
+              <ion-label position="floating" >Username</ion-label>
+              <ion-input   type="text" placeholder="Ingrese su usuario" formControlName="formularioNombreUsuario">
+              </ion-input>
             </ion-item>
-            <ion-text color="danger" *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['required']">
+            <ion-text color="danger"
+              *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['required']">
               *El campo de nombre es obligatorio
             </ion-text>
-            <ion-text color="danger" *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['minlength']">
-              *El campo de nombre debe contener al menos {{contactForm.get('formularioNombreUsuario')?.errors?.['minlength'].requiredLength}} letras
+            <ion-text color="danger"
+              *ngIf="contactForm.get('formularioNombreUsuario')?.touched && contactForm.get('formularioNombreUsuario')?.errors?.['minlength']">
+              *El campo de nombre debe contener al menos
+              {{contactForm.get('formularioNombreUsuario')?.errors?.['minlength'].requiredLength}} letras
             </ion-text>
-          </ion-col>
+          </div>
 
-          <!-- Campo de contraseña -->
-          <ion-col size="12" class="ion-margin">
-            <ion-item lines="full">
-              <ion-label position="floating" color="light">Contraseña</ion-label>
-              <ion-input type="password" placeholder="Ingrese su contraseña"
-                        formControlName="formularioPasswordUsuario"></ion-input>
+          <div class="campos">
+            <ion-item class="columnas" lines="full" class="ion-margin-bottom">
+              <ion-label position="floating" >Contraseña</ion-label>
+              <ion-input  type="password" placeholder="Ingrese su contraseña" formControlName="formularioPasswordUsuario">
+              </ion-input>
             </ion-item>
-            <ion-text color="danger" *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['required']">
+            <ion-text color="danger"
+              *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['required']">
               *El campo de contraseña es obligatorio
             </ion-text>
-            <ion-text color="danger" *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['minlength']">
+            <ion-text color="danger"
+              *ngIf="contactForm.get('formularioPasswordUsuario')?.touched && contactForm.get('formularioPasswordUsuario')?.errors?.['minlength']">
+              *El campo de contraseña debe contener al menos
+              {{contactForm.get('formularioPasswordUsuario')?.errors?.['minlength'].requiredLength}} letras
             </ion-text>
-          </ion-col>
+          </div>
 
           <!-- Botones -->
-          <ion-col size="12" class="ion-margin-top">
-            <ion-button expand="block" (click)="onSubmit()" [disabled]="contactForm.invalid">Iniciar sesión</ion-button>
-            <ion-button expand="block" color="danger" (click)="recuperarPass()" class="ion-margin-top">Recuperar contraseña</ion-button>
-            <ion-button expand="block" routerLink="/tabs/tab1/registro" class="ion-margin-top">Registrarse</ion-button>
-          </ion-col>
+          <div class="ion-margin-top">
+            <ion-button class="campos" expand="block" size="large" (click)="onSubmit()" [disabled]="contactForm.invalid">Iniciar sesión</ion-button>
+            <ion-button class="campos" expand="block" size="large" color="danger" (click)="recuperarPass()" >Recuperar contraseña</ion-button>
+            <ion-button class="campos" expand="block" size="large" routerLink="/tabs/tab1/registro" >Registrarse</ion-button>
+          </div>
 
-        </ion-row>
-      </ion-grid>
-    </form>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </form>
 
 </ion-content>

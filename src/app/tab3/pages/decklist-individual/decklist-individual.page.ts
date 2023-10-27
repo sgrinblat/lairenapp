@@ -1,4 +1,4 @@
-import { Component, ElementRef, Inject, Input, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, Input, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { Carta } from 'src/app/objetos/carta';
@@ -61,6 +61,7 @@ export class DecklistIndividualPage implements OnInit {
     private route: Router,
     private alertController: AlertController,
     private platform: Platform,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.reino = new Array<Carta>();
@@ -561,7 +562,7 @@ export class DecklistIndividualPage implements OnInit {
       return;
     }
 
-    if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 10) {
+    if (this.reino.length < 2 || this.reino.length > 4 || this.boveda.length != 1 || this.sidedeck.length != 0) {
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
@@ -613,6 +614,8 @@ export class DecklistIndividualPage implements OnInit {
             this.conexion.crearDecklistJugador(deck, usuario.id).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido guardada.`);
+                this.cdr.detectChanges();
+                this.route.navigate(["/tabs/tab3"]);
               },
               (error) => {
                 this.presentAlert('Error!', 'Algo salió mal');
@@ -622,6 +625,8 @@ export class DecklistIndividualPage implements OnInit {
             this.conexion.putDecklist(this.decklistId, deck).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido actualizada.`);
+                this.cdr.detectChanges();
+                this.route.navigate(["/tabs/tab3"]);
               },
               (error) => {
                 this.presentAlert('Error!', 'Algo salió mal');

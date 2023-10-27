@@ -1,0 +1,38 @@
+<ion-content color="dark">
+  <div class="container">
+    <div class="counter-section top">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-text-center life-container">
+
+          <ion-button color="danger" (click)="changeLifeCount(-1, 'player1')" class="change-button">-</ion-button>
+          <div class="life-count player1-counter">{{ player1Life }}</div>
+          <ion-button color="success" (click)="changeLifeCount(1, 'player1')" class="change-button">+</ion-button>
+
+          <div class="change-indicator player1-counter" *ngIf="displayPlayer1Counter">
+            {{ player1ChangeCounter > 0 ? '+' : '' }}{{ player1ChangeCounter }}
+          </div>
+
+        </ion-col>
+      </ion-row>
+    </div>
+
+    <ion-button color="light" class="reset-button" (click)="resetLife()">
+      <ion-icon name="refresh-outline"></ion-icon>
+    </ion-button>
+
+    <div class="counter-section bottom">
+      <ion-row class="ion-no-padding">
+        <ion-col class="ion-text-center life-container">
+
+          <div class="change-indicator player2" *ngIf="displayPlayer2Counter">
+            {{ player2ChangeCounter > 0 ? '+' : '' }}{{ player2ChangeCounter }}
+          </div>
+
+          <ion-button color="success" (click)="changeLifeCount(1, 'player2')" class="change-button">+</ion-button>
+          <div class="life-count">{{ player2Life }}</div>
+          <ion-button color="danger" (click)="changeLifeCount(-1, 'player2')" class="change-button">-</ion-button>
+        </ion-col>
+      </ion-row>
+    </div>
+  </div>
+</ion-content>

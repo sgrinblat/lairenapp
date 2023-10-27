@@ -1,6 +1,6 @@
-<ion-tabs>
+<ion-tabs (ionTabsDidChange)="onTabChange($event)">
+  <ion-tab-bar color="dark" slot="bottom">
 
-  <ion-tab-bar slot="bottom">
     <ion-tab-button tab="tab1" href="/tabs/tab1">
       <ion-icon aria-hidden="true" name="home"></ion-icon>
       <ion-label>Home</ion-label>
@@ -15,6 +15,11 @@
       <ion-icon aria-hidden="true" name="save"></ion-icon>
       <ion-label>Decklist</ion-label>
     </ion-tab-button>
-  </ion-tab-bar>
 
+    <ion-tab-button tab="life-counter" href="/tabs/life-counter">
+      <ion-icon aria-hidden="true" name="heart"></ion-icon>
+      <ion-label>Vidas</ion-label>
+    </ion-tab-button>
+
+  </ion-tab-bar>
 </ion-tabs>

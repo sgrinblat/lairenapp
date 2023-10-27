@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Decklist } from '../objetos/decklist';
@@ -18,11 +18,12 @@ export class Tab3Page {
   defaultImage = '../../assets/fondos/mente-mejor.jpg';
 
 
-  constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private alertController: AlertController) {}
+  constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute,
+    private route: Router, private alertController: AlertController, private cdr: ChangeDetectorRef,) {}
 
   usuarioLogeado: boolean = false;  // Variable para rastrear si hay un usuario logeado
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
       if (usuario && usuario.id) {  // Verifica si el objeto usuario y su id existen
         this.usuarioLogeado = true;  // Actualiza la variable a true si hay un usuario logeado
@@ -41,6 +42,7 @@ export class Tab3Page {
   obtenerDecklists(id: number) {
     this.conexion.getTodasLasDecklistsDeJugador(id).subscribe((dato) => {
       this.decklists = dato;
+      this.cdr.detectChanges();
       if(this.decklists.length < 1) {
         this.tieneDecks = false;
       } else {
@@ -49,6 +51,9 @@ export class Tab3Page {
     });
   }
 
+  crearDeck() {
+    this.route.navigate(['/tabs/tab3/decklist']);
+  }
 
   editarDecklist(deck: Decklist) {
     this.route.navigate(['/tabs/tab3/decklist', deck.id]);

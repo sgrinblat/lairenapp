@@ -1,0 +1,66 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.life-count {
+  font-size: 10em;
+  margin: 0 1em;
+}
+
+.change-button {
+  font-size: 2em;
+}
+.counter-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.top {
+  flex-direction: row;
+  background-color: #181818;
+}
+
+.bottom {
+  flex-direction: row;
+  background-color: #d77d07;
+}
+
+.counter {
+  font-size: 5em;
+  margin: 0 20px;
+}
+
+ion-button {
+  font-size: 2em;
+}
+
+.player1-counter {
+  transform: rotate(180deg);
+}
+
+
+.change-indicator {
+  font-size: 3em;
+  padding: 10px;
+}
+
+.reset-button {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  --padding-start: 15px;
+  --padding-end: 15px;
+}
+
+
+
+
+
+
+
+//background-color: #bb3838;

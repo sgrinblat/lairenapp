@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
-import { CartaIndividualPageModule } from '../tab2/pages/carta-individual/carta-individual.module';
 
 const routes: Routes = [
   {
@@ -12,7 +11,10 @@ const routes: Routes = [
         path: 'tab1',
         loadChildren: () => import('../tab1/tab1.module').then(m => m.Tab1PageModule)
       },
-
+      {
+        path: 'life-counter',
+        loadChildren: () => import('../life-counter/life-counter.module').then(m => m.LifeCounterPageModule)
+      },
       {
         path: 'tab2',
         children: [
@@ -52,6 +54,7 @@ const routes: Routes = [
     redirectTo: '/tabs/tab1',
     pathMatch: 'full'
   }
+
 ];
 
 @NgModule({

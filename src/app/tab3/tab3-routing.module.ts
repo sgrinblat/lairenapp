@@ -6,7 +6,12 @@ const routes: Routes = [
   {
     path: '',
     component: Tab3Page,
-  },  {
+  },
+  {
+    path: 'decklist',
+    loadChildren: () => import('./pages/decklist-individual/decklist-individual.module').then( m => m.DecklistIndividualPageModule)
+  },
+  {
     path: 'decklist-individual',
     loadChildren: () => import('./pages/decklist-individual/decklist-individual.module').then( m => m.DecklistIndividualPageModule)
   }
