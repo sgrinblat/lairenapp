@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { Usuario } from 'src/app/objetos/usuario';
 import { ConexionService } from 'src/app/services/conexion.service';
 
@@ -15,7 +15,9 @@ export class RegistroPage implements OnInit {
   contactForm!: FormGroup;
   user: Usuario = new Usuario();
 
-  constructor(private alertController: AlertController, private conexion: ConexionService, private readonly fb: FormBuilder, private activatedRoute: ActivatedRoute, private route: Router) {
+  constructor(private alertController: AlertController, private conexion: ConexionService,
+    private readonly fb: FormBuilder, private activatedRoute: ActivatedRoute,
+    private route: Router, private toastController: ToastController) {
     this.contactForm = fb.group({
       formularioUsernameUsuario: ['', [Validators.required, Validators.minLength(5)]],
       formularioPasswordUsuario: ['', [Validators.required, Validators.minLength(6), PasswordStrengthValidator()]],
@@ -32,7 +34,7 @@ export class RegistroPage implements OnInit {
 
 
   registrarse() {
-
+    this.presentToast("Espere un momento por favor!");
     this.user.username = this.contactForm.value.formularioUsernameUsuario;
     this.user.password = this.contactForm.value.formularioPasswordUsuario;
     this.user.email = this.contactForm.value.formularioEmailUsuario;
@@ -60,6 +62,24 @@ export class RegistroPage implements OnInit {
     });
 
     await alert.present();
+  }
+
+  async presentToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000,
+      position: 'top',
+      color: 'primary'
+    });
+    toast.present();
+  }
+
+  reiniciarForm() {
+    this.contactForm.value.formularioUsernameUsuario = "";
+    this.contactForm.value.formularioPasswordUsuario = "";
+    this.contactForm.value.formularioEmailUsuario = "";
+    this.contactForm.value.formularioNombreUsuario = "";
+    this.contactForm.value.formularioApellidoUsuario = "";
   }
 
 }

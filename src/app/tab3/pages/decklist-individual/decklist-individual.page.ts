@@ -14,7 +14,7 @@ import { encode } from 'base64-arraybuffer';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 import { Plugins, PermissionState} from '@capacitor/core';
-import { Platform } from '@ionic/angular';
+import { Platform, ToastController } from '@ionic/angular';
 const { Permissions } = Plugins;
 
 import { AlertController } from '@ionic/angular';
@@ -62,6 +62,7 @@ export class DecklistIndividualPage implements OnInit {
     private alertController: AlertController,
     private platform: Platform,
     private cdr: ChangeDetectorRef,
+    private toastController: ToastController,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.reino = new Array<Carta>();
@@ -734,6 +735,7 @@ export class DecklistIndividualPage implements OnInit {
     decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
     if (decklist !== undefined) {
       nombreCompleto = await this.presentAlertInput('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
+      this.presentToast("Estamos generando tu imagen, aguarda un momento!");
       if (nombreCompleto !== undefined) {
         const image1Promise = new Promise<string>((resolve) => {
           this.onImageGenerated = (imageUrl: string) => {
@@ -866,6 +868,16 @@ export class DecklistIndividualPage implements OnInit {
         binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
+  }
+
+  async presentToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000,
+      position: 'top',
+      color: 'primary'
+    });
+    toast.present();
   }
 
 }

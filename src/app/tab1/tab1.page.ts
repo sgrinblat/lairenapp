@@ -4,9 +4,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { ConexionService } from '../services/conexion.service';
 
-import Swal from 'sweetalert2';
 import { Usuario } from '../objetos/usuario';
-import { AlertController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
+import { Observable, from } from 'rxjs';
+import { ContentfulService } from '../services/contentful.service';
+
 
 @Component({
   selector: 'app-tab1',
@@ -17,6 +19,8 @@ export class Tab1Page {
 
   contactForm!: FormGroup;
   user: Usuario = new Usuario();
+  usuario: Usuario;
+  posts$: Observable<any>;
 
   constructor(
     private conexion: ConexionService,
@@ -24,7 +28,9 @@ export class Tab1Page {
     private activatedRoute: ActivatedRoute,
     private route: Router,
     private alertController: AlertController,
+    private toastController: ToastController,
     private cdr: ChangeDetectorRef,
+    private contentfulService: ContentfulService
   ) {
     this.contactForm = fb.group({
       formularioNombreUsuario: [
@@ -38,17 +44,30 @@ export class Tab1Page {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.verElemento();
+    if(this.verElemento() == true) {
+      this.posts$ = from(this.contentfulService.getBlogEntriesByCategory("noticia"));
+    }
 
-  resetPage(): void {
-    // Navega primero a una ruta ficticia
-    this.route.navigateByUrl('/reset', { skipLocationChange: true }).then(() => {
-        // Navega de nuevo a tu ruta actual
-        this.route.navigate([""]);
-    });
-}
+  }
+
+  verElemento() {
+    if(this.conexion.sesionIniciadaJugador()){
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  cerrarSesion() {
+    this.conexion.deslogear();
+    this.presentToast("Has cerrado tu sesión");
+  }
 
   onSubmit() {
+    this.presentToast("Espere un momento por favor!");
+
     this.user.username = this.contactForm.value.formularioNombreUsuario;
     this.user.password = this.contactForm.value.formularioPasswordUsuario;
 
@@ -110,8 +129,9 @@ export class Tab1Page {
           role: 'cancel',
         },
         {
-          text: 'Guardar',
+          text: 'Enviar',
           handler: (data) => {
+            this.presentToast("Espera un momento por favor!");
             this.conexion.requestPasswordReset(data.email).subscribe(
               (response) => {
                 this.presentAlert('Email enviado!', 'Revisá tu mail para restaurar tu contraseña');
@@ -136,6 +156,20 @@ export class Tab1Page {
     });
 
     await alert.present();
+  }
+
+  async presentToast(mensaje: string) {
+    const toast = await this.toastController.create({
+      message: mensaje,
+      duration: 2000,
+      position: 'top',
+      color: 'primary'
+    });
+    toast.present();
+  }
+
+  verEntrada(id: string) {
+    this.route.navigate(['noticias', id]);
   }
 
 

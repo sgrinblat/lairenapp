@@ -19,9 +19,14 @@ const routes: Routes = [
   {
     path: 'decklist/:id',
     loadChildren: () => import('./tab3/pages/decklist-individual/decklist-individual.module').then(m => m.DecklistIndividualPageModule)
-  },  {
+  },
+  {
     path: 'life-counter',
     loadChildren: () => import('./life-counter/life-counter.module').then( m => m.LifeCounterPageModule)
+  },
+  {
+    path: 'noticias/:id',
+    loadChildren: () => import('./tab1/pages/entrada/entrada.module').then( m => m.EntradaPageModule)
   },
 
 

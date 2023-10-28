@@ -1,5 +1,11 @@
-<ion-content class="ion-padding">
+<ion-header  *ngIf="verElemento()">
+  <ion-toolbar color="dark">
+    <ion-title>Tu lugar en Lairen</ion-title>
+    <ion-button slot="end" color="warning" (click)="cerrarSesion()" >Cerrar sesión</ion-button>
+  </ion-toolbar>
+</ion-header>
 
+<ion-content *ngIf="!verElemento()" class="ion-padding">
   <form [formGroup]="contactForm">
     <ion-grid >
       <ion-row >
@@ -8,7 +14,7 @@
           <div class="campos">
             <ion-item lines="full" class="ion-margin-bottom">
               <ion-label position="floating" >Username</ion-label>
-              <ion-input   type="text" placeholder="Ingrese su usuario" formControlName="formularioNombreUsuario">
+              <ion-input type="text" placeholder="Ingrese su usuario" formControlName="formularioNombreUsuario">
               </ion-input>
             </ion-item>
             <ion-text color="danger"
@@ -51,4 +57,34 @@
     </ion-grid>
   </form>
 
+</ion-content>
+
+<ion-content color="light" *ngIf="verElemento()">
+  <div class="ion-margin-top">
+    <ion-grid>
+      <ion-row *ngFor="let post of posts$ | async">
+        <ion-col>
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>{{ post.fields.title }}</ion-card-title>
+              <ion-card-subtitle>{{ post.fields.updatedDate | date }}</ion-card-subtitle>
+            </ion-card-header>
+            <ion-card-content>
+              <ion-grid>
+                <ion-row>
+                  <ion-col size="6">
+                    <img [src]="post.fields.featuredImage.fields.file.url" alt="" (click)="verEntrada(post.sys.id)" />
+                  </ion-col>
+                  <ion-col size="6">
+                    <p class="ion-text-center" >{{ post.fields.summary }}</p>
+                    <ion-button fill="clear" (click)="verEntrada(post.sys.id)">Leer noticia</ion-button>
+                  </ion-col>
+                </ion-row>
+              </ion-grid>
+            </ion-card-content>
+          </ion-card>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
 </ion-content>

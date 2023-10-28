@@ -1,0 +1,28 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>
+      Noticias
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light" class="ion-padding">
+
+  <!-- Sección de la entrada del blog individual -->
+  <div  *ngIf="blogPost$ | async as blogPost">
+    <ion-card color="dark">
+      <ion-card-header>
+        <ion-card-title>
+          {{ blogPost.fields.title }}
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <ion-img [src]="blogPost.fields.featuredImage.fields.file.url"></ion-img>
+        <div *ngFor="let paragraph of blogPost.fields.content.content" class="parrafo">
+          <div [innerHTML]="paragraph.content[0].value"></div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+</ion-content>
