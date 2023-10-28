@@ -7,28 +7,7 @@ const routes: Routes = [
   {
     path: '',
     loadChildren: () => import('./tabs/tabs.module').then(m => m.TabsPageModule)
-  },
-  {
-    path: 'buscador/cartas/:id',
-    loadChildren: () => import('./tab2/pages/carta-individual/carta-individual.module').then(m => m.CartaIndividualPageModule)
-  },
-  {
-    path: 'decklist',
-    loadChildren: () => import('./tab3/pages/decklist-individual/decklist-individual.module').then(m => m.DecklistIndividualPageModule)
-  },
-  {
-    path: 'decklist/:id',
-    loadChildren: () => import('./tab3/pages/decklist-individual/decklist-individual.module').then(m => m.DecklistIndividualPageModule)
-  },
-  {
-    path: 'life-counter',
-    loadChildren: () => import('./life-counter/life-counter.module').then( m => m.LifeCounterPageModule)
-  },
-  {
-    path: 'noticias/:id',
-    loadChildren: () => import('./tab1/pages/entrada/entrada.module').then( m => m.EntradaPageModule)
-  },
-
+  }
 
 ];
 @NgModule({

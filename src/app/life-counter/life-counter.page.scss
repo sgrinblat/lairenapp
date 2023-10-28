@@ -45,16 +45,10 @@ ion-button {
 
 .change-indicator {
   font-size: 3em;
-  padding: 10px;
 }
 
 .reset-button {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  --padding-start: 15px;
-  --padding-end: 15px;
+  font-size: 20px;
 }
 
 

@@ -386,37 +386,4 @@ export class ConexionService {
     return true;
   }
 
-
-
-
-  /*
-  // método para mostrar vendedores registrados
-  obtenerVendedoresRegistrados():Observable<Vendedor[]> {
-    return this.httpClient.get<Vendedor[]>(`${this.baseURLVendedor}`);
-  }
-
-  // método para mostrar ventas registradas
-  obtenerVentasRegistradas():Observable<Venta[]> {
-    return this.httpClient.get<Venta[]>(`${this.baseURLFactura}`);
-  }
-
-  // este método nos sirve para registrar un vendedor en la base de datos
-  registrarVendedor(vendedor: Vendedor) : Observable<Object> {
-    return this.httpClient.post(`${this.baseURLVendedor}`, vendedor);
-  }
-
-  // este método nos sirve para registrar un producto en la base de datos
-  registrarProducto(producto: Producto) : Observable<Object> {
-    return this.httpClient.post(`${this.baseURLProducto}`, producto);
-  }
-
-  // este método nos sirve para registrar un producto en la base de datos
-  registrarVenta(venta: Venta) : Observable<Object> {
-    return this.httpClient.post(`${this.baseURLFactura}`, venta);
-  } */
-
-
-  // -------------------------------------------
-
-
 }

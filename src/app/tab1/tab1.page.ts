@@ -44,13 +44,13 @@ export class Tab1Page {
     });
   }
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.verElemento();
     if(this.verElemento() == true) {
       this.posts$ = from(this.contentfulService.getBlogEntriesByCategory("noticia"));
     }
-
   }
+
 
   verElemento() {
     if(this.conexion.sesionIniciadaJugador()){
@@ -169,7 +169,7 @@ export class Tab1Page {
   }
 
   verEntrada(id: string) {
-    this.route.navigate(['noticias', id]);
+    this.route.navigate(['/tabs/tab1/noticias', id]);
   }
 
 
