@@ -333,7 +333,6 @@ export class ConexionService {
   }
 
   iniciarSesion(token: any) {
-    console.log("Token recibido:", token);
     localStorage.setItem("token", token);
   }
 

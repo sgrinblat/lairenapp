@@ -1,7 +1,8 @@
 {
   "name": "lairenmobile",
   "integrations": {
-    "capacitor": {}
+    "capacitor": {},
+    "cordova": {}
   },
   "type": "angular"
 }

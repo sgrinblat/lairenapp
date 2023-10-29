@@ -563,7 +563,7 @@ export class DecklistIndividualPage implements OnInit {
       return;
     }
 
-    if (this.reino.length < 2 || this.reino.length > 4 || this.boveda.length != 1 || this.sidedeck.length != 0) {
+    if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 10) {
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
@@ -666,6 +666,38 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  async presentAlertGuardar(header: string, message: string) {
+    return new Promise<string | undefined>((resolve) => {
+      this.alertController.create({
+        header,
+        message,
+        inputs: [
+          {
+            name: 'input',
+            type: 'text',
+            placeholder: 'Ingresa aquí',
+          },
+        ],
+        buttons: [
+          {
+            text: 'Cancelar',
+            role: 'cancel',
+            handler: () => resolve(undefined),
+          },
+          {
+            text: 'Guardar',
+            handler: (data) => {
+              this.presentToast("Se está generado tu imagen, espera por favor!");
+              setTimeout(() => {
+                resolve(data.input);
+            }, 100);
+            }
+          },
+        ],
+      }).then(alert => alert.present());
+    });
+  }
+
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header,
@@ -734,8 +766,7 @@ export class DecklistIndividualPage implements OnInit {
 
     decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
     if (decklist !== undefined) {
-      nombreCompleto = await this.presentAlertInput('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
-      this.presentToast("Estamos generando tu imagen, aguarda un momento!");
+      nombreCompleto = await this.presentAlertGuardar('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
       if (nombreCompleto !== undefined) {
         const image1Promise = new Promise<string>((resolve) => {
           this.onImageGenerated = (imageUrl: string) => {

@@ -73,7 +73,6 @@ export class Tab1Page {
 
     this.conexion.generateToken(this.user).subscribe(
       (dato: any) => {
-        console.log(dato);
         this.conexion.iniciarSesion(dato.token);
         this.conexion.getCurrentUser().subscribe((userDetails: any) => {
           if (userDetails.authorities[0].authority == 'JUGADOR') {
@@ -88,24 +87,21 @@ export class Tab1Page {
                   this.route.navigate(['/tabs/tab3']);
                 } else {
                   this.presentAlert('Fallido', 'No has verificado tu mail');
-                  console.log("el alert del mail")
+                  ("el alert del mail")
                 }
               },
               (error) => {
-                console.log("inicio fallido")
                 this.presentAlert('Fallido', 'Inicio de sesión fallido');
                 this.conexion.loginStatus.next(false);
               }
             );
           } else {
-            console.log("inicio fallido")
             this.presentAlert('Fallido', 'Inicio de sesión fallido');
             this.conexion.loginStatus.next(false);
           }
         });
       },
       (error) => {
-        console.log("inicio fallido")
         this.presentAlert('Fallido', 'Inicio de sesión fallido');
         this.conexion.loginStatus.next(false);
       }
