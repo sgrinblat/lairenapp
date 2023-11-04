@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
@@ -11,7 +11,7 @@ import { ConexionService } from 'src/app/services/conexion.service';
   templateUrl: './registro.page.html',
   styleUrls: ['./registro.page.scss'],
 })
-export class RegistroPage implements OnInit {
+export class RegistroPage {
   contactForm!: FormGroup;
   user: Usuario = new Usuario();
 
@@ -28,11 +28,6 @@ export class RegistroPage implements OnInit {
 
   }
 
-  ngOnInit() {
-  }
-
-
-
   registrarse() {
     this.presentToast("Espere un momento por favor!");
     this.user.username = this.contactForm.value.formularioUsernameUsuario;
@@ -46,12 +41,24 @@ export class RegistroPage implements OnInit {
         this.presentAlert('Registro exitoso', 'Verificá tu mail para confirmar la cuenta!');
         this.route.navigate(['/tabs/tab1']);
       },
-      (error: Error) => {
-        this.presentAlert('No se ha podido registrar', 'Contactanos para ver porqué no pudiste registrarte');
-        console.log("Qué estás buscando, picaron? " + error.message)
+      (error) => {
+        if (error.status === 409) { // Conflict status
+          this.presentAlert('Usuario existente', error.error.mensaje);
+        } else {
+          this.presentAlert('No se ha podido registrar', 'Contactanos para ver porqué no pudiste registrarte');
+        }
+        console.log("Qué estás buscando, picaron? " + error.message);
       }
     );
 
+  }
+
+  reiniciarForm() {
+    this.contactForm.value.formularioUsernameUsuario = "";
+    this.contactForm.value.formularioPasswordUsuario = "";
+    this.contactForm.value.formularioEmailUsuario = "";
+    this.contactForm.value.formularioNombreUsuario = "";
+    this.contactForm.value.formularioApellidoUsuario = "";
   }
 
   async presentAlert(header: string, message: string) {
@@ -74,14 +81,6 @@ export class RegistroPage implements OnInit {
     toast.present();
   }
 
-  reiniciarForm() {
-    this.contactForm.value.formularioUsernameUsuario = "";
-    this.contactForm.value.formularioPasswordUsuario = "";
-    this.contactForm.value.formularioEmailUsuario = "";
-    this.contactForm.value.formularioNombreUsuario = "";
-    this.contactForm.value.formularioApellidoUsuario = "";
-  }
-
 }
 
 export function PasswordStrengthValidator(): ValidatorFn {
@@ -94,4 +93,7 @@ export function PasswordStrengthValidator(): ValidatorFn {
     return null;
   };
 }
+
+
+
 

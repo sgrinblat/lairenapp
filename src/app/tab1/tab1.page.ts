@@ -144,6 +144,10 @@ export class Tab1Page {
     await alert.present();
   }
 
+  verEntrada(id: string) {
+    this.route.navigate(['/tabs/tab1/noticias', id]);
+  }
+
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,
@@ -164,9 +168,7 @@ export class Tab1Page {
     toast.present();
   }
 
-  verEntrada(id: string) {
-    this.route.navigate(['/tabs/tab1/noticias', id]);
-  }
+
 
 
 }

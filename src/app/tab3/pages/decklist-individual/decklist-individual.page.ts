@@ -747,12 +747,6 @@ export class DecklistIndividualPage implements OnInit {
 
   }
 
-  onImageLoad(event: Event) {
-    const imageElement = event.target as HTMLImageElement;
-    const elementRef = new ElementRef(imageElement);
-    elementRef.nativeElement.classList.add('fade-in');
-  }
-
 
   opcionesVisibles = false;
 

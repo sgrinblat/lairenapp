@@ -36,7 +36,7 @@ export class Tab2Page {
 
     this.conexion.getTodasLasRarezas().pipe(
       map(rarezas => {
-        const order = ['BRONCE', 'PLATA', 'ORO', 'DIAMANTE'];
+        const order = ['BRONCE', 'PLATA', 'ORO', 'DIAMANTE', 'ESMERALDA'];
         return rarezas.sort((a, b) => order.indexOf(a.nombreRareza) - order.indexOf(b.nombreRareza));
       })
     ).subscribe(rarezas => {
@@ -72,7 +72,6 @@ export class Tab2Page {
     }
     return `${texto.substr(0, limite)}...`;
   }
-
 
 
   onRarezaChange(selectedRareza: number) {
@@ -274,10 +273,5 @@ export class Tab2Page {
     return uniqueCostes;
   }
 
-  onImageLoad(event: Event) {
-    const imageElement = event.target as HTMLImageElement;
-    const elementRef = new ElementRef(imageElement);
-    elementRef.nativeElement.classList.add('fade-in');
-  }
 
 }

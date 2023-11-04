@@ -25,8 +25,6 @@ export class ConexionService {
   private expansionURL = `${this.urlBasica}/expansion/expansiones`
   private rarezaURL = `${this.urlBasica}/rareza/rarezas`
   private tipoURL = `${this.urlBasica}/tipo/tipos`
-  private tiendaURL = `${this.urlBasica}/tienda/tiendas`
-  private torneoURL = `${this.urlBasica}/competidor/competidores`
   private decklistURL = `${this.urlBasica}/decklist/decklists`
   private usuarioURL = `${this.urlBasica}/usuarios/user/`
   private tokenURL = `${this.urlBasica}/generate-token`
@@ -151,59 +149,6 @@ export class ConexionService {
   }
 
 
-  // ---------------------- TORNEOS ----------------------
-
-  getTodosLosJugadores():Observable<Jugador[]> {
-    return this.httpClient.get<Jugador[]>(`${this.torneoURL}`);
-  }
-
-  getJugadorById(id:number): Observable<Jugador> {
-    return this.httpClient.get<Jugador>(`${this.torneoURL}/${id}`);
-  }
-
-  getJugadorByDni(dni: string): Observable<Jugador> {
-    return this.httpClient.get<Jugador>(`${this.torneoURL}/dni/${dni}`);
-  }
-
-  getJugadoresPorPuntos():Observable<Jugador[]> {
-    return this.httpClient.get<Jugador[]>(`${this.torneoURL}/puntos`);
-  }
-
-  getJugadoresPorPuntosApertura():Observable<Jugador[]> {
-    return this.httpClient.get<Jugador[]>(`${this.torneoURL}/puntosApertura`);
-  }
-
-  getJugadoresPorRangos():Observable<Jugador[]> {
-    return this.httpClient.get<Jugador[]>(`${this.torneoURL}/rangos`);
-  }
-
-  getJugadoresPorNombre():Observable<Jugador[]> {
-    return this.httpClient.get<Jugador[]>(`${this.torneoURL}/nombre`);
-  }
-
-  getJugadorPorNombreAndApellido(nombre: string, apellido: string): Observable<Jugador> {
-    return this.httpClient.get<Jugador>(`${this.torneoURL}/nombrecompleto/${nombre}/${apellido}`);
-  }
-
-  saveJugador(jugador: Jugador) : Observable<Object> {
-    return this.httpClient.post(`${this.torneoURL}/crear`, jugador);
-  }
-
-  deleteJugador(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.torneoURL}/eliminar/${id}`);
-  }
-
-  putJugador(id: number, jugador: Jugador, ): Observable<Object> {
-    return this.httpClient.put(`${this.torneoURL}/actualizar/${id}`, jugador);
-  }
-
-  registrarResultadoPartido(id: number, id2: number): Observable<Object> {
-    return this.httpClient.get(`${this.torneoURL}/partido/${id}/vs/${id2}`);
-  }
-
-
-
-
 
   // ---------------------- TIPOS ----------------------
 
@@ -230,29 +175,6 @@ export class ConexionService {
 
   putTipo(id: number, tipo: Tipo, ): Observable<Object> {
     return this.httpClient.put(`${this.tipoURL}/actualizar/${id}`, tipo);
-  }
-
-  // ---------------------- TIENDAS ----------------------
-
-  getTodasLasTiendas():Observable<Tienda[]> {
-    return this.httpClient.get<Tienda[]>(`${this.tiendaURL}`);
-  }
-
-  getTiendaById(id:number): Observable<Tienda> {
-    return this.httpClient.get<Tienda>(`${this.tiendaURL}/${id}`);
-  }
-
-  // este método nos sirve para registrar una tienda
-  postTienda(tienda: Tienda) : Observable<Object> {
-    return this.httpClient.post(`${this.tiendaURL}/crear`, tienda);
-  }
-
-  deleteTienda(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.tiendaURL}/eliminar/${id}`);
-  }
-
-  putTienda(id: number, tienda: Tienda, ): Observable<Object> {
-    return this.httpClient.put(`${this.tiendaURL}/actualizar/${id}`, tienda);
   }
 
   // ---------------------- DECKLISTS ----------------------
@@ -332,6 +254,11 @@ export class ConexionService {
     return this.httpClient.get(`${this.usuarioURL}actual`);
   }
 
+  /**
+   *
+   * @param token
+   * @returns
+   */
   iniciarSesion(token: any) {
     localStorage.setItem("token", token);
   }

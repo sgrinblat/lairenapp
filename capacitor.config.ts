@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.lairenapp',
+  appId: 'com.ludicat.lairenapp',
   appName: 'LairenApp',
   webDir: 'www',
   server: {

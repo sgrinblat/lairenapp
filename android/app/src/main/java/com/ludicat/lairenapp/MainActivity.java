@@ -1,4 +1,4 @@
-package com.example.lairenapp;
+package com.ludicat.lairenapp;
 
 import com.getcapacitor.BridgeActivity;
 
