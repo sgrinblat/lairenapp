@@ -9,6 +9,7 @@ import { Rareza } from '../objetos/rareza';
 import { Expansion } from '../objetos/expansion';
 import { Tipo } from '../objetos/tipo';
 
+
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
@@ -27,6 +28,7 @@ export class Tab2Page {
   rarezas: Rareza[] = [];
   tipos: Tipo[] = [];
   costes: number[] = [];
+  cantidadDeCartasMostrandose: number;
 
   constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private renderer: Renderer2) {}
 
@@ -76,185 +78,54 @@ export class Tab2Page {
 
   onRarezaChange(selectedRareza: number) {
     this.selectedRareza = selectedRareza;
+    if(this.selectedRareza == 0) {
+      this.selectedRareza = null;
+    }
     this.filterCartas();
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
   onExpansionChange(selectedExpansion: number) {
     this.selectedExpansion = selectedExpansion;
+    if(this.selectedExpansion == 0) {
+      this.selectedExpansion = null;
+    }
     this.filterCartas();
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
   onTipoChange(selectedTipo: number) {
     this.selectedTipo = selectedTipo;
+    if(this.selectedTipo == 0) {
+      this.selectedTipo = null;
+    }
     this.filterCartas();
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
   onCosteChange(selectedCoste: number) {
     this.selectedCoste = selectedCoste;
+    if(this.selectedCoste == 0) {
+      this.selectedCoste = null;
+    }
     this.filterCartas();
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
 
   filterCartas() {
     this.filteredCartas = this.cartas.filter(carta => {
+      // Comprobación de si cada filtro está establecido (no '0' que es nuestro valor para 'Deseleccionar').
+      let matchesExpansion = this.selectedExpansion === null || carta.expansion.idExpansion === this.selectedExpansion;
+      let matchesRareza = this.selectedRareza === null || carta.rareza.idRareza === this.selectedRareza;
+      let matchesTipo = this.selectedTipo === null || carta.tipo.idTipo === this.selectedTipo;
+      let matchesCoste = this.selectedCoste === null || carta.costeCarta === this.selectedCoste;
 
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-      if(this.selectedExpansion !== null && this.selectedRareza !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedExpansion !== null && this.selectedTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedExpansion !== null && this.selectedCoste !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedRareza !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedRareza !== null && this.selectedTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedRareza !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedCoste !== null) {
-        if(carta.costeCarta == this.selectedCoste)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      return false;
+      // Solo aplica los filtros que están activamente seleccionados.
+      return (!this.selectedExpansion || matchesExpansion) &&
+            (!this.selectedRareza || matchesRareza) &&
+            (!this.selectedTipo || matchesTipo) &&
+            (!this.selectedCoste || matchesCoste);
     });
   }
 

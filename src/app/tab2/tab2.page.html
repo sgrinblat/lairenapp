@@ -19,7 +19,7 @@
     <!-- Filtro de expansión -->
     <ion-item>
       <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)" placeholder="Selecciona una expansión">
-        <ion-select-option value="">Selecciona una expansión</ion-select-option>
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}
         </ion-select-option>
       </ion-select>
@@ -29,7 +29,7 @@
     <ion-item>
       <ion-label>Rarezas</ion-label>
       <ion-select [(ngModel)]="selectedRareza" (ionChange)="onRarezaChange(selectedRareza)" placeholder="Selecciona una rareza">
-        <ion-select-option value="">Selecciona una rareza</ion-select-option>
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let rare of rarezas" [value]="rare.idRareza">{{rare.nombreRareza}}
         </ion-select-option>
       </ion-select>
@@ -39,7 +39,7 @@
     <ion-item>
       <ion-label>Tipos</ion-label>
       <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
-        <ion-select-option value="">Selecciona un tipo de carta</ion-select-option>
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
       </ion-select>
     </ion-item>
@@ -48,19 +48,25 @@
     <ion-item>
       <ion-label>Coste</ion-label>
       <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
-        <ion-select-option value="default">Selecciona un tipo de carta</ion-select-option>
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
       </ion-select>
     </ion-item>
   </ion-list>
 
+  <section *ngIf="filteredCartas.length > 0" class="section section-xl text-center card-seccion">
+    <h2>Se han encontrado {{cantidadDeCartasMostrandose}} cartas con los filtros seleccionados</h2>
+  </section>
+
   <ion-grid>
     <ion-row *ngFor="let carta of filteredCartas">
-      <ion-col size="12">
-        <ion-img class="carta" [src]="carta.urlImagen" (click)="visualizarCarta(carta.idCarta)"></ion-img>
-        <div class="carta-texto">
-          <p>{{acortarTexto(carta.textoCarta)}}</p>
-          <p><a (click)="visualizarCarta(carta.idCarta)">... Ver más</a></p>
+      <ion-col size="12" class="carta-container">
+        <div class="carta-contenido">
+          <ion-img class="carta" [src]="carta.urlImagen" (click)="visualizarCarta(carta.idCarta)"></ion-img>
+          <div class="carta-texto">
+            <p>{{acortarTexto(carta.textoCarta)}}</p>
+            <p><a (click)="visualizarCarta(carta.idCarta)">... Ver más</a></p>
+          </div>
         </div>
       </ion-col>
     </ion-row>
@@ -81,8 +87,6 @@
   </ion-row>
 </ion-grid>
 
-
-
   <ion-grid
     *ngIf="filteredCartas.length === 0 && (selectedRareza || selectedExpansion || selectedTipo || selectedCoste || searchText)">
     <ion-row>
@@ -91,7 +95,5 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-
-
 
 </ion-content>
