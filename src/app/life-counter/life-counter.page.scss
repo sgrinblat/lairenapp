@@ -2,37 +2,60 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  justify-content: center;
   color: #fff;
 }
 
 .life-count {
   font-size: 10em;
-  margin: 0 1em;
 }
 
 .change-button {
-  font-size: 2em;
+  font-size: 1.5em;
 }
+
+.columna-boton-izquierdo {
+  margin-left: 1px;
+}
+
+.columna-boton-derecho {
+  margin-right: 1px;
+}
+
 .counter-section {
-  flex: 1;
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
 }
 
+.top .life-count {
+  transform: rotate(180deg);
+}
+
+.top, .bottom {
+  ion-col {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
 .top {
-  flex-direction: row;
   background-color: #181818;
 }
 
 .bottom {
-  flex-direction: row;
   background-color: #d77d07;
 }
 
-.counter {
-  font-size: 5em;
-  margin: 0 20px;
+.reset-button-container {
+  // display: flex;
+  justify-content: center;
+}
+
+.reset-button {
+  font-size: 1em; /* Ajusta este valor según sea necesario */
 }
 
 ion-button {
@@ -43,19 +66,10 @@ ion-button {
   transform: rotate(180deg);
 }
 
-
 .change-indicator {
   font-size: 3em;
+  position: absolute;
+  padding-bottom: 30vh;
 }
 
-.reset-button {
-  font-size: 20px;
-}
 
-
-
-
-
-
-
-//background-color: #bb3838;

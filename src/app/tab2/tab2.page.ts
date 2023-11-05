@@ -273,5 +273,4 @@ export class Tab2Page {
     return uniqueCostes;
   }
 
-
 }
