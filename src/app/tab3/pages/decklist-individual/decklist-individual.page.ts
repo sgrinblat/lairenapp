@@ -21,6 +21,7 @@ import { AlertController } from '@ionic/angular';
 import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
 import { ImageGeneratorComponent } from './image-generator/image-generator.component';
 import { ImageSidedeckComponent } from './image-sidedeck/image-sidedeck.component';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 @Component({
   selector: 'app-decklist-individual',
@@ -77,6 +78,23 @@ export class DecklistIndividualPage implements OnInit {
   @ViewChild('imageBoveda') ImageBovedaDeckComponent: ImageBovedaDeckComponent;
   @ViewChild('imageSideDeck') ImageSidedeckComponent: ImageSidedeckComponent;
 
+  ionViewWillEnter(): void {
+    // Activa la función para mantener la pantalla encendida
+    KeepAwake.keepAwake().then(() => {
+      console.log('La pantalla se mantendrá encendida');
+    }).catch((error) => {
+      console.error('Error al intentar mantener la pantalla encendida', error);
+    });
+  }
+
+  ionViewWillLeave(): void {
+    // Permite que la pantalla se apague cuando el componente se destruya
+    KeepAwake.allowSleep().then(() => {
+      console.log('La pantalla puede apagarse');
+    }).catch((error) => {
+      console.error('Error al intentar permitir que la pantalla se apague', error);
+    });
+  }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {

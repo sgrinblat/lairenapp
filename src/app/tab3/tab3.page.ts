@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import Swal from 'sweetalert2';
+
 import { Decklist } from '../objetos/decklist';
 import { Usuario } from '../objetos/usuario';
 import { ConexionService } from '../services/conexion.service';
@@ -29,13 +29,10 @@ export class Tab3Page {
         this.usuarioLogeado = true;  // Actualiza la variable a true si hay un usuario logeado
         this.obtenerDecklists(usuario.id);
       } else {
-        this.usuarioLogeado = false;  // Actualiza la variable a false si no hay un usuario logeado
-        // Aquí puedes también actualizar el mensaje en el front para informar que no hay un usuario logeado
+        this.usuarioLogeado = false;
       }
     }, error => {
       this.usuarioLogeado = false;  // Actualiza la variable a false si ocurre un error
-      // Opcionalmente, maneja el error (ej., mostrar un mensaje de error en la UI)
-      console.error('Error obteniendo el usuario actual:', error);
     });
   }
 
@@ -60,23 +57,45 @@ export class Tab3Page {
   }
 
   eliminarDecklist(deck: Decklist) {
-    this.conexion.deleteDecklist(deck.id).subscribe(
-      async (dato) => {
-        this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
-          this.obtenerDecklists(usuario.id);
-        });
-        const alert = await this.alertController.create({
-          header: 'Eliminado',
-          message: 'La decklist ha sido eliminada.',
-          buttons: ['OK'],
-          cssClass: 'my-custom-class',
-        });
-
-        await alert.present();
-      },
-      (error) => console.log("Qué estás buscando, picaron?")
-    );
+    // Crear y presentar el alerta de confirmación
+    this.alertController.create({
+      header: 'Confirmación',
+      message: '¿Estás seguro de que quieres eliminar esta decklist?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Eliminación cancelada');
+          }
+        },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            // Solo procede con la eliminación si el usuario confirma
+            this.conexion.deleteDecklist(deck.id).subscribe(
+              async (dato) => {
+                this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
+                  this.obtenerDecklists(usuario.id);
+                });
+                const alert = await this.alertController.create({
+                  header: 'Eliminado',
+                  message: 'La decklist ha sido eliminada.',
+                  buttons: ['OK'],
+                  cssClass: 'my-custom-class',
+                });
+                await alert.present();
+              },
+              (error) => {
+                console.log("Error al eliminar: ", error);
+              }
+            );
+          }
+        }
+      ]
+    }).then(alertElem => alertElem.present());
   }
+
 
 
 

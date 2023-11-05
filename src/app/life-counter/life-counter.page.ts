@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
+import { KeepAwake } from '@capacitor-community/keep-awake';
 
 @Component({
   selector: 'app-life-counter',
   templateUrl: './life-counter.page.html',
   styleUrls: ['./life-counter.page.scss'],
 })
-export class LifeCounterPage implements OnInit {
+export class LifeCounterPage {
   player1Life: number = 20;
   player2Life: number = 20;
   player1ChangeCounter: number = 0;
@@ -50,8 +51,22 @@ export class LifeCounterPage implements OnInit {
     this.player2Life = 20;
   }
 
-  ngOnInit(): void {
+  ionViewWillEnter(): void {
+    // Activa la función para mantener la pantalla encendida
+    KeepAwake.keepAwake().then(() => {
+      console.log('La pantalla se mantendrá encendida');
+    }).catch((error) => {
+      console.error('Error al intentar mantener la pantalla encendida', error);
+    });
+  }
 
+  ionViewWillLeave(): void {
+    // Permite que la pantalla se apague cuando el componente se destruya
+    KeepAwake.allowSleep().then(() => {
+      console.log('La pantalla puede apagarse');
+    }).catch((error) => {
+      console.error('Error al intentar permitir que la pantalla se apague', error);
+    });
   }
 
 }
