@@ -16,6 +16,11 @@ export class ImageSidedeckComponent {
 
   constructor() {}
 
+  /**
+   * Genera la imagen creando un contenedor con estilos especificos y coloca la imagen de las cartas conforme a la decklist derivada
+   * @param decklist lista de cartas creada por el usuario
+   * @param nombreCompleto nombre del jugador
+   */
   async generarImagen(decklist: string, nombreCompleto: string) {
     // Crear contenedor de imágenes
     const contenedor = document.createElement('div');
@@ -196,6 +201,11 @@ export class ImageSidedeckComponent {
     document.body.removeChild(contenedor);
   }
 
+  /**
+   * Crea la imagen con la información de las cartas usando la librería html12canvas
+   * @param element
+   * @returns
+   */
   private convertToDataURL(element: HTMLElement): Promise<string> {
     return new Promise((resolve, reject) => {
       html2canvas(element, {

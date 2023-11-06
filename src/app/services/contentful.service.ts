@@ -14,24 +14,22 @@ export class ContentfulService {
     accessToken: "IGv5hBAOWPYsHXHxobo_4kL0XOurB5wUiBHwulmoR6w"
   });
 
-  getAllEntries () {
-    const promise = this.client.getEntries();
-    return from(promise);
-  }
 
+  /**
+   * Recupera una entrada espeficia por id en el API de Contentful
+   * @param id id de la entrada
+   * @returns
+   */
   getEntryById(id:string) {
     const promise = this.client.getEntry(id);
     return from(promise);
   }
 
-  getEntryByUrlHandle(urlHande: string) {
-    return this.client.getEntries({
-      content_type: 'blogPost',
-      'fields.urlHandle': urlHande
-    })
-    .then(response => response.items);
-  }
-
+  /**
+   * Recupera entradas según la categoría
+   * @param categoryName categoría de entradas a buscar
+   * @returns
+   */
   getBlogEntriesByCategory(categoryName: string) {
     return this.client.getEntries({
       content_type: 'blogPost',
@@ -41,25 +39,5 @@ export class ContentfulService {
     .then(response => response.items);
   }
 
-
-  getBlogEntriesByCategoryAndOnlyThree(categoryName: string) {
-    return this.client.getEntries({
-      content_type: 'blogPost',
-      'fields.category': categoryName,
-      limit: 3,
-      order: '-sys.createdAt'
-    } as any )
-    .then(response => response.items);
-  }
-
-  getBlogEntriesByCategoryAndOnlyOne(categoryName: string) {
-    return this.client.getEntries({
-      content_type: 'blogPost',
-      'fields.category': categoryName,
-      limit: 1,
-      order: '-sys.createdAt'
-    } as any )
-    .then(response => response.items);
-  }
 
 }

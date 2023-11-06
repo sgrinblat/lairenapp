@@ -28,6 +28,9 @@ export class RegistroPage {
 
   }
 
+  /**
+   * Toma los valores ingresados de los inputs del formulario de registro y consume un metodo POST del API para registrar al usuario
+   */
   registrarse() {
     this.presentToast("Espere un momento por favor!");
     this.user.username = this.contactForm.value.formularioUsernameUsuario;
@@ -42,7 +45,7 @@ export class RegistroPage {
         this.route.navigate(['/tabs/tab1']);
       },
       (error) => {
-        if (error.status === 409) { // Conflict status
+        if (error.status === 409) { // Chequea si ya existe el username registrado
           this.presentAlert('Usuario existente', error.error.mensaje);
         } else {
           this.presentAlert('No se ha podido registrar', 'Contactanos para ver porqué no pudiste registrarte');
@@ -53,14 +56,11 @@ export class RegistroPage {
 
   }
 
-  reiniciarForm() {
-    this.contactForm.value.formularioUsernameUsuario = "";
-    this.contactForm.value.formularioPasswordUsuario = "";
-    this.contactForm.value.formularioEmailUsuario = "";
-    this.contactForm.value.formularioNombreUsuario = "";
-    this.contactForm.value.formularioApellidoUsuario = "";
-  }
-
+  /**
+   * Comodín para poner una alerta en el front
+   * @param header Mensaje de cabecera
+   * @param message Mensaje de cuerpo
+   */
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,
@@ -71,6 +71,10 @@ export class RegistroPage {
     await alert.present();
   }
 
+  /**
+   * Comodín para poner un toast en el front
+   * @param mensaje Mensaje de cuerpo
+   */
   async presentToast(mensaje: string) {
     const toast = await this.toastController.create({
       message: mensaje,
@@ -83,6 +87,10 @@ export class RegistroPage {
 
 }
 
+/**
+ * A través de una expresión regular chequea si la pass tiene al menos una mayúscula y un número y 6 chars
+ * @returns boolean o null
+ */
 export function PasswordStrengthValidator(): ValidatorFn {
   return (control: AbstractControl): {[key: string]: any} | null => {
     let password = control.value;

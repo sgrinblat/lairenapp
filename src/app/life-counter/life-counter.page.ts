@@ -16,6 +16,11 @@ export class LifeCounterPage {
   player1Timeout: any = null;
   player2Timeout: any = null;
 
+  /**
+   * Actualiza la cantidad de vida del jugador para renderizar en pantalla
+   * @param amount cantidad de vida a cambiar
+   * @param player jugador 1 o 2
+   */
   changeLifeCount(amount: number, player: string) {
     if (player === 'player1') {
       this.player1Life += amount;
@@ -26,6 +31,11 @@ export class LifeCounterPage {
     }
   }
 
+  /**
+   * Actualiza la cantidad de vida del jugador para renderizar en pantalla
+   * @param amount cantidad de vida a cambiar
+   * @param player jugador 1 o 2
+   */
   updateChangeCounter(amount: number, player: string) {
     if (player === 'player1') {
       clearTimeout(this.player1Timeout); // Clear previous timeout
@@ -46,13 +56,18 @@ export class LifeCounterPage {
     }
   }
 
+  /**
+   * Regresa la vida a 20 para ambos jugadores
+   */
   resetLife() {
     this.player1Life = 20;
     this.player2Life = 20;
   }
 
+  /**
+   * Al ingresar a este componente, esto provoca que la pantalla no pueda apagarse por la config de energia del aparato
+   */
   ionViewWillEnter(): void {
-    // Activa la función para mantener la pantalla encendida
     KeepAwake.keepAwake().then(() => {
       console.log('La pantalla se mantendrá encendida');
     }).catch((error) => {
@@ -60,8 +75,10 @@ export class LifeCounterPage {
     });
   }
 
+  /**
+   * Permite que pueda volver a apagarse la pantalla
+   */
   ionViewWillLeave(): void {
-    // Permite que la pantalla se apague cuando el componente se destruya
     KeepAwake.allowSleep().then(() => {
       console.log('La pantalla puede apagarse');
     }).catch((error) => {

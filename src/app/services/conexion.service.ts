@@ -32,178 +32,117 @@ export class ConexionService {
 
   constructor(private httpClient: HttpClient) { }
 
-  // este método nos sirve para obtener todas las cartas subidas
+  /**
+   * este método nos sirve para obtener todas las cartas subidas
+   * @returns cartas de la base de datos
+   */
   getTodasLasCartas():Observable<Carta[]> {
     return this.httpClient.get<Carta[]>(`${this.cartaURL}`);
   }
 
-  // este método nos sirve para obtener todas las cartas subidas
+  /**
+   * este método nos sirve para obtener todas las cartas subidas
+   * @returns cartas ordenadas alfabeticamente
+   */
   getTodasLasCartasOrdenadas():Observable<Carta[]> {
     return this.httpClient.get<Carta[]>(`${this.cartaURL}/ordenadas`);
   }
 
-  // este método nos sirve para ver una carta por su ID
+  /**
+   * este método nos sirve para ver una carta por su ID
+   * @param id de la carta
+   * @returns carta
+   */
   getCartaById(id:number): Observable<Carta> {
     return this.httpClient.get<Carta>(`${this.cartaURL}/${id}`);
   }
 
-  // este método nos sirve para ver una carta por su ID y se visualiza de manera pública
+  /**
+   * este método nos sirve para ver una carta por su ID y se visualiza de manera pública
+   * @param id id de carta
+   * @returns carta
+   */
   getCartaByIdPublic(id:number): Observable<Carta> {
     return this.httpClient.get<Carta>(`${this.cartaPublicaURL}/buscador/open/${id}`);
   }
 
-  // este método nos sirve para ver una carta por una parte de su nombre
-  getCartaByPartialName(nombre: string): Observable<Carta> {
-    return this.httpClient.get<Carta>(`${this.cartaURL}/nombre/${nombre}`);
-  }
-
-  // este método nos sirve para buscar una carta por su coste
-  getCartaByCoste(coste: number): Observable<Carta[]> {
-    return this.httpClient.get<Carta[]>(`${this.cartaURL}/coste/${coste}`);
-  }
-
-  // este método nos sirve para buscar una carta por expansion
-  getCartaByExpansion(id: number): Observable<Carta[]> {
-    return this.httpClient.get<Carta[]>(`${this.cartaURL}/expansion/${id}`);
-  }
-
-  countCartaByExpansion(id: number): Observable<number> {
-    return this.httpClient.get<number>(`${this.cartaURL}/expansion/contar/${id}`);
-  }
-
-  // este método nos sirve para buscar una carta por rareza
-  getCartaByRareza(id: number): Observable<Carta[]> {
-    return this.httpClient.get<Carta[]>(`${this.cartaURL}/rareza/${id}`);
-  }
-
-  // este método nos sirve para buscar una carta por tipo
-  getCartaByTipo(id: number): Observable<Carta[]> {
-    return this.httpClient.get<Carta[]>(`${this.cartaURL}/tipo/${id}`);
-  }
-
-  // este método nos sirve para registrar una carta
-  postCarta(carta: Carta) : Observable<Object> {
-    return this.httpClient.post(`${this.cartaURL}/crear`, carta);
-  }
-
-  deleteCarta(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.cartaURL}/eliminar/${id}`);
-  }
-
-  putCarta(id: number, carta: Carta, ): Observable<Object> {
-    return this.httpClient.put(`${this.cartaURL}/actualizar/${id}`, carta);
-  }
-
-  // ---------------------- EXPANSIONES ----------------------
-
+  /**
+   * Obtener todas las expansiones de la base de datos
+   * @returns lista de expansiones
+   */
   getTodasLasExpas():Observable<Expansion[]> {
     return this.httpClient.get<Expansion[]>(`${this.expansionURL}`);
   }
 
-  getExpaById(id:number): Observable<Expansion> {
-    return this.httpClient.get<Expansion>(`${this.expansionURL}/${id}`);
-  }
-
-  getExpaByName(nombre: string): Observable<Expansion> {
-    return this.httpClient.get<Expansion>(`${this.expansionURL}/nombre/${nombre}`);
-  }
-
-  // este método nos sirve para registrar una expansion
-  postExpansion(expansion: Expansion) : Observable<Object> {
-    return this.httpClient.post(`${this.expansionURL}/crear`, expansion);
-  }
-
-  deleteExpansion(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.expansionURL}/eliminar/${id}`);
-  }
-
-  putExpansion(id: number, expansion: Expansion, ): Observable<Object> {
-    return this.httpClient.put(`${this.expansionURL}/actualizar/${id}`, expansion);
-  }
-
-  // ---------------------- RAREZAS ----------------------
-
+  /**
+   * Obtener todas las rarezas de la base de datos
+   * @returns lista de rarezas
+   */
   getTodasLasRarezas():Observable<Rareza[]> {
     return this.httpClient.get<Rareza[]>(`${this.rarezaURL}`);
   }
 
-  getRarezaById(id:number): Observable<Rareza> {
-    return this.httpClient.get<Rareza>(`${this.rarezaURL}/${id}`);
-  }
-
-  getRarezaByName(nombre: string): Observable<Rareza> {
-    return this.httpClient.get<Rareza>(`${this.rarezaURL}/nombre/${nombre}`);
-  }
-
-  // este método nos sirve para registrar una rareza
-  postRareza(rareza: Rareza) : Observable<Object> {
-    return this.httpClient.post(`${this.rarezaURL}/crear`, rareza);
-  }
-
-  deleteRareza(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.rarezaURL}/eliminar/${id}`);
-  }
-
-  putRareza(id: number, rareza: Rareza, ): Observable<Object> {
-    return this.httpClient.put(`${this.rarezaURL}/actualizar/${id}`, rareza);
-  }
-
-
-
-  // ---------------------- TIPOS ----------------------
-
+  /**
+   * Obtener todos los tipos de la base de datos
+   * @returns lista de tipos
+   */
   getTodasLosTipos():Observable<Tipo[]> {
     return this.httpClient.get<Tipo[]>(`${this.tipoURL}`);
   }
 
-  getTipoById(id:number): Observable<Tipo> {
-    return this.httpClient.get<Tipo>(`${this.tipoURL}/${id}`);
-  }
-
-  getTipoByName(nombre: string): Observable<Tipo> {
-    return this.httpClient.get<Tipo>(`${this.tipoURL}/nombre/${nombre}`);
-  }
-
-  // este método nos sirve para registrar un tipo de carta
-  postTipo(tipo: Tipo) : Observable<Object> {
-    return this.httpClient.post(`${this.tipoURL}/crear`, tipo);
-  }
-
-  deleteTipo(id: number): Observable<Object> {
-    return this.httpClient.delete(`${this.tipoURL}/eliminar/${id}`);
-  }
-
-  putTipo(id: number, tipo: Tipo, ): Observable<Object> {
-    return this.httpClient.put(`${this.tipoURL}/actualizar/${id}`, tipo);
-  }
 
   // ---------------------- DECKLISTS ----------------------
 
+  /**
+   * Obtener todas las decklists
+   * @returns
+   */
   getTodasLasDecklists():Observable<Decklist[]> {
     return this.httpClient.get<Decklist[]>(`${this.decklistURL}`);
   }
 
+  /**
+   * Obtener decklists por jugador
+   * @param id id de jugador
+   * @returns
+   */
   getTodasLasDecklistsDeJugador(id:number):Observable<Decklist[]> {
     return this.httpClient.get<Decklist[]>(`${this.decklistURL}/mostrar/${id}`);
   }
 
+  /**
+   * Obtener una decklist especifica
+   * @param id id de decklist
+   * @returns
+   */
   getDecklistById(id:number): Observable<Decklist> {
     return this.httpClient.get<Decklist>(`${this.decklistURL}/${id}`);
   }
 
-  // este método nos sirve para registrar una decklist
-  postDecklist(decklist: Decklist) : Observable<Object> {
-    return this.httpClient.post(`${this.decklistURL}/crear`, decklist);
-  }
-
+  /**
+   * Crear una decklist nueva
+   * @param decklist decklist creada por el usuario en el front
+   * @returns
+   */
   crearDecklistJugador(decklist: Decklist, id: number) : Observable<Object> {
     return this.httpClient.post(`${this.decklistURL}/crear/${id}`, decklist);
   }
 
+  /**
+   * Eliminar decklist del jugador
+   * @param id id de decklist
+   * @returns
+   */
   deleteDecklist(id: number): Observable<Object> {
     return this.httpClient.delete(`${this.decklistURL}/eliminar/${id}`);
   }
 
+  /**
+   * Actualizar la decklist del jugador
+   * @param id id de la decklist
+   * @param decklist lista de cartas
+   * @returns
+   */
   putDecklist(id: number, decklist: Decklist): Observable<Object> {
     return this.httpClient.put(`${this.decklistURL}/actualizar/${id}`, decklist);
   }
@@ -213,70 +152,70 @@ export class ConexionService {
   private user!: Usuario;
   private roles: Role[] = [];
 
-  setUsuario(user: Usuario) {
-    this.user = user;
-  }
-
-  setRoles(roles: Role[]) {
-    this.roles = roles;
-  }
-
-  getTodosLosUsers():Observable<Usuario[]> {
-    return this.httpClient.get<Usuario[]>(`${this.usuarioURL}mails`);
-  }
-
-  // Este método te permitirá verificar el rol en cualquier parte de tu aplicación.
-  isAdmin(): boolean {
-    return this.roles.some(role => role.name === 'ADMIN');
-  }
-
+  /**
+   * Crea un usuario nuevo en la base de datos
+   * @param user usuario con los datos rellenados por la persona en el formulario de registro
+   * @returns
+   */
   postUsuario(user: Usuario) : Observable<Object> {
     return this.httpClient.post(`${this.usuarioURL}crear`, user);
   }
 
+  /**
+   * Envía mail para reiniciar la contraseña si fue solicitado por el usuario
+   * @param email mail del usuario
+   * @returns
+   */
   requestPasswordReset(email: string): Observable<any> {
     return this.httpClient.post(`${this.usuarioURL}reset_password_request`, email);
   }
 
-  resetPassword(token: string, username: string, newPassword: string): Observable<any> {
-    return this.httpClient.post(`${this.usuarioURL}reset_password`, { token, username, newPassword });
-  }
-
+  /**
+   * Genera token jwt del usuario
+   * @param loginData
+   * @returns
+   */
   generateToken(loginData: any) {
     return this.httpClient.post(`${this.tokenURL}`, loginData);
   }
 
+  /**
+   * Recupera el usuario leyendo el token
+   * @returns
+   */
   public getCurrentUser(){
     return this.httpClient.get(`${this.tokenObtenerUserURL}`);
   }
 
+  /**
+   * Recupera el usuario por el id
+   * @returns
+   */
   public getUsuarioActual(){
     return this.httpClient.get(`${this.usuarioURL}actual`);
   }
 
   /**
    *
-   * @param token
-   * @returns
+   * @param token token almacenado en el localStorage
    */
   iniciarSesion(token: any) {
     localStorage.setItem("token", token);
   }
 
+  /**
+   * Chequea al usuario que se busca loguear viendo si tiene su mail ya verificado
+   * @param token token almacenado en el localStorage
+   * @returns
+   */
   verifyEmail(token: string): Observable<any> {
     return this.httpClient.get(`${this.usuarioURL}verify?token=${token}`);
   }
 
-  sesionIniciadaAdmin() {
-    let tokenStr = localStorage.getItem("token");
-    let tokenStrLocation = localStorage.getItem("location");
-    if (tokenStr == undefined || tokenStr == "" || tokenStr == null || tokenStrLocation != '5') {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
+  /**
+   * Se inicia sesión el jugador, guarda su info en el localStorage. Se desloguea solo al vencerse el token
+   * @returns
+   */
   sesionIniciadaJugador() {
     const tokenStr = localStorage.getItem('token');
     const tokenStrLocation = localStorage.getItem('location');
@@ -297,14 +236,26 @@ export class ConexionService {
     }
   }
 
+  /**
+   * Recupera el token del localStorage
+   * @returns token
+   */
   getToken() {
     return localStorage.getItem("token");
   }
 
+  /**
+   * Guarda al usuario en el localStorage
+   * @param user
+   */
   setUser(user: any) {
     localStorage.setItem("user", JSON.stringify(user));
   }
 
+  /**
+   * Recupera del localStorage info del usuario
+   * @returns
+   */
   getUser() {
     let userStr = localStorage.getItem("user");
     if (userStr != null) {
@@ -315,6 +266,10 @@ export class ConexionService {
     }
   }
 
+  /**
+   * Elimina los datos del localStorage cuando el usuario se desloguea
+   * @returns boolean
+   */
   deslogear() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");

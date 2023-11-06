@@ -31,10 +31,11 @@ export class CartaIndividualPage implements OnInit {
 
   constructor(private conexion: ConexionService, private router: Router, private route: ActivatedRoute) { }
 
+  /**
+   * Renderiza la info de una carta especifica en el front
+   */
   ngOnInit(): void {
-
     this.id = this.route.snapshot.params['id'];
-
     this.expansiones = this.conexion.getTodasLasExpas();
     this.rarezas = this.conexion.getTodasLasRarezas();
     this.tipos = this.conexion.getTodasLosTipos();
@@ -47,8 +48,6 @@ export class CartaIndividualPage implements OnInit {
     );
   }
 
-  regresarAlBuscador() {
-    this.router.navigate(['buscador']);
-  }
+
 
 }

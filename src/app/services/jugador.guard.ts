@@ -9,6 +9,12 @@ import { ConexionService } from './conexion.service';
 export class JugadorGuard implements CanActivate {
   constructor(private conexion: ConexionService, private router: Router) { }
 
+  /**
+   * Determina si se puede visualizar o no cierto componente, conforme a si el usuario está logueado o no
+   * @param route
+   * @param state
+   * @returns
+   */
   canActivate(
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {

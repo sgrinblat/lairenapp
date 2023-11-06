@@ -19,18 +19,23 @@ export class EntradaPage implements OnInit {
     private router: Router,
     private route: ActivatedRoute,) { }
 
+  /**
+   * Toma el id de la entrada de la url y consume el API de Contentful para renderizar su información
+   */
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const id = params['id'];
       this.blogPost$ = this.contentfulService.getEntryById(id).pipe(
         tap(() => {
-          // Asegúrate de que este setTimeout está dentro del operador tap.
           setTimeout(() => this.modifyImageStyles(), 0);
         })
       );
     });
   }
 
+  /**
+   * Recupera las imágenes de la entrada del blog y le aplica estilos responsivos
+   */
   modifyImageStyles() {
     const images = this.elementRef.nativeElement.querySelectorAll('img');
     for (let i = 1; i < images.length; i++) {

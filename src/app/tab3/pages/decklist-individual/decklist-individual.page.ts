@@ -78,8 +78,12 @@ export class DecklistIndividualPage implements OnInit {
   @ViewChild('imageBoveda') ImageBovedaDeckComponent: ImageBovedaDeckComponent;
   @ViewChild('imageSideDeck') ImageSidedeckComponent: ImageSidedeckComponent;
 
+
+  /**
+   * Activa la función para mantener la pantalla encendida
+   */
   ionViewWillEnter(): void {
-    // Activa la función para mantener la pantalla encendida
+    //
     KeepAwake.keepAwake().then(() => {
       console.log('La pantalla se mantendrá encendida');
     }).catch((error) => {
@@ -87,8 +91,10 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Permite que la pantalla se apague cuando se abandona este componente
+   */
   ionViewWillLeave(): void {
-    // Permite que la pantalla se apague cuando el componente se destruya
     KeepAwake.allowSleep().then(() => {
       console.log('La pantalla puede apagarse');
     }).catch((error) => {
@@ -96,6 +102,10 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Si existe una decklist en la url, busca la información y la renderiza en el front
+   * Al igual que el buscador de cartas, también recupera cartas, tipos, rarezas, expansiones, costes
+   */
   ngOnInit(): void {
     this.activatedRoute.params.subscribe((params) => {
       this.decklistId = params['id'];
@@ -158,26 +168,58 @@ export class DecklistIndividualPage implements OnInit {
       });
   }
 
+
+  /**
+   * Filtra las cartas acorde a la rareza seleccionada
+   * @param selectedRareza id de la rareza seleccionada
+   */
   onRarezaChange(selectedRareza: number) {
     this.selectedRareza = selectedRareza;
+    if(this.selectedRareza == 0) {
+      this.selectedRareza = null;
+    }
     this.filterCartas();
   }
 
+  /**
+   * Filtra las cartas acorde a la expansión seleccionada
+   * @param selectedExpansion id de la expansión seleccionada
+   */
   onExpansionChange(selectedExpansion: number) {
     this.selectedExpansion = selectedExpansion;
+    if(this.selectedExpansion == 0) {
+      this.selectedExpansion = null;
+    }
     this.filterCartas();
   }
 
+  /**
+   * Filtra las cartas acorde al tipo de carta seleccionado
+   * @param selectedTipo id del tipo de carta seleccionado
+   */
   onTipoChange(selectedTipo: number) {
     this.selectedTipo = selectedTipo;
+    if(this.selectedTipo == 0) {
+      this.selectedTipo = null;
+    }
     this.filterCartas();
   }
 
+  /**
+   * Filtra las cartas acorde al coste de la carta seleccionado
+   * @param selectedCoste número de coste seleccionado
+   */
   onCosteChange(selectedCoste: number) {
     this.selectedCoste = selectedCoste;
+    if(this.selectedCoste == 0) {
+      this.selectedCoste = null;
+    }
     this.filterCartas();
   }
 
+  /**
+   * Filtro de cartas según el nombre de la carta
+   */
   searchByText() {
     this.filteredCartas = this.cartas.filter((carta) => {
       if (carta.nombreCarta.includes(this.searchText)) {
@@ -188,191 +230,29 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Chequea cuántos filtros han sido seleccionados en simúltaneo, y va filtrando cartas acorde a ello
+   */
   filterCartas() {
-    this.filteredCartas = this.cartas.filter((carta) => {
-      if (
-        this.selectedExpansion !== null &&
-        this.selectedRareza !== null &&
-        this.selectedTipo !== null &&
-        this.selectedCoste !== null
-      ) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.expansion.idExpansion == this.selectedExpansion &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
+    this.filteredCartas = this.cartas.filter(carta => {
+      // Comprobación de si cada filtro está establecido (no '0' que es nuestro valor para 'Deseleccionar').
+      let matchesExpansion = this.selectedExpansion === null || carta.expansion.idExpansion === this.selectedExpansion;
+      let matchesRareza = this.selectedRareza === null || carta.rareza.idRareza === this.selectedRareza;
+      let matchesTipo = this.selectedTipo === null || carta.tipo.idTipo === this.selectedTipo;
+      let matchesCoste = this.selectedCoste === null || carta.costeCarta === this.selectedCoste;
 
-      if (
-        this.selectedExpansion !== null &&
-        this.selectedRareza !== null &&
-        this.selectedTipo !== null
-      ) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.expansion.idExpansion == this.selectedExpansion
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (
-        this.selectedRareza !== null &&
-        this.selectedTipo !== null &&
-        this.selectedCoste !== null
-      ) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (
-        this.selectedExpansion !== null &&
-        this.selectedTipo !== null &&
-        this.selectedCoste !== null
-      ) {
-        if (
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.expansion.idExpansion == this.selectedExpansion &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (
-        this.selectedExpansion !== null &&
-        this.selectedRareza !== null &&
-        this.selectedCoste !== null
-      ) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.expansion.idExpansion == this.selectedExpansion &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedExpansion !== null && this.selectedRareza !== null) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.expansion.idExpansion == this.selectedExpansion
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedExpansion !== null && this.selectedTipo !== null) {
-        if (
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.expansion.idExpansion == this.selectedExpansion
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedTipo !== null && this.selectedCoste !== null) {
-        if (
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedExpansion !== null && this.selectedCoste !== null) {
-        if (
-          carta.expansion.idExpansion == this.selectedExpansion &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedRareza !== null && this.selectedCoste !== null) {
-        if (
-          carta.rareza.idRareza == this.selectedRareza &&
-          carta.costeCarta == this.selectedCoste
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedRareza !== null && this.selectedTipo !== null) {
-        if (
-          carta.tipo.idTipo == this.selectedTipo &&
-          carta.rareza.idRareza == this.selectedRareza
-        ) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedRareza !== null) {
-        if (carta.rareza.idRareza == this.selectedRareza) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-      if (this.selectedExpansion !== null) {
-        if (carta.expansion.idExpansion == this.selectedExpansion) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-      if (this.selectedTipo !== null) {
-        if (carta.tipo.idTipo == this.selectedTipo) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      if (this.selectedCoste !== null) {
-        if (carta.costeCarta == this.selectedCoste) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
-      return false;
+      // Solo aplica los filtros que están activamente seleccionados.
+      return (!this.selectedExpansion || matchesExpansion) &&
+            (!this.selectedRareza || matchesRareza) &&
+            (!this.selectedTipo || matchesTipo) &&
+            (!this.selectedCoste || matchesCoste);
     });
   }
 
-  obtenerCartas() {
+  /**
+   * Recupera todas las cartas de la base de datos
+   */
+   obtenerCartas() {
     this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
       this.cartas = dato;
       this.costes = this.getUniqueCostesCartas(this.cartas);
@@ -380,18 +260,31 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * De todas las cartas recuperadas, se observa los costes de las mismas para armar así el filtro de costes
+   * @param cartas objeto recuperado de cartas de la base de datos
+   * @returns lista numérica de cuantos costes existen
+   */
   getUniqueCostesCartas(cartas: Carta[]): number[] {
-    let costes: number[] = cartas.map((carta) => carta.costeCarta);
+    let costes: number[] = cartas.map(carta => carta.costeCarta);
     let uniqueCostes: number[] = [...new Set(costes)];
     return uniqueCostes;
   }
 
+  /**
+   * Obtiene las decklists del usuario logueado
+   */
   obtenerDecklists() {
     this.conexion.getTodasLasDecklists().subscribe((dato) => {
       this.decklists = dato;
     });
   }
 
+  /**
+   * Chequea las cartas añadidas en la lista para que no se repitan las cartas de mismo nombre, y así mostrar un solo item en el front
+   * @param lista lista de cartas que se va generando cuando el usuario añade cartas
+   * @returns la lista de cartas filtrada
+   */
   getCartasUnicas(lista: Carta[]): Carta[] {
     return lista.filter(
       (carta, i, self) =>
@@ -399,10 +292,25 @@ export class DecklistIndividualPage implements OnInit {
     );
   }
 
+  /**
+   * Cuenta la cantidad de cartas que tiene por cada nombre repetido de carta
+   * @param carta carta a chequear el nombre
+   * @param lista lista de cartas que se va generando cuando el usuario añade cartas
+   * @returns la lista de cartas filtrada
+   */
   getCantidad(carta: Carta, lista: Carta[]): number {
     return lista.filter((c) => c.nombreCarta === carta.nombreCarta).length;
   }
 
+  /**
+   * Añade cartas a la lista, según el tipo de carta que tiene
+   * Tesoros -> Boveda
+   * Unidades, monumentos y acciones -> Reino
+   * El sidedeck puede tener cualquier tipo de carta
+   * En el reino puede repetirse hasta 4 veces la misma carta. En la boveda, solo puede haber 1 copia de la misma carta
+   * @param carta carta a añadir
+   * @returns
+   */
   agregarCarta(carta: Carta) {
     if (this.banderaLista) {
       if (carta.tipo.nombreTipo == 'TESORO' || carta.tipo.nombreTipo == 'TESORO - SAGRADO') {
@@ -520,6 +428,11 @@ export class DecklistIndividualPage implements OnInit {
     }
   }
 
+  /**
+   * Elimina carta de la lista
+   * @param carta carta a eliminar
+   * @param lista lista de cartas creada por el usuario
+   */
   eliminarCarta(carta: Carta, lista: Carta[]) {
     const index = lista.findIndex((item) => item === carta);
     if (index !== -1) {
@@ -527,10 +440,18 @@ export class DecklistIndividualPage implements OnInit {
     }
   }
 
+  /**
+   * Nos informa la cantidad de cartas que hay
+   * @param lista lista de cartas creada por el usuario
+   * @returns
+   */
   getTotalCartas(lista: Carta[]) {
     return lista.length;
   }
 
+  /**
+   * Botón que el usuario selecciona para añadir cartas al sidedeck o al reino/boveda
+   */
   switchearEntreMainAndSidedeck() {
     this.banderaLista = !this.banderaLista;
 
@@ -560,6 +481,10 @@ export class DecklistIndividualPage implements OnInit {
     }
   }
 
+  /**
+   * Persiste la decklist creada por el usuario en la base de datos
+   * @returns
+   */
   async guardarDecklist() {
     let sagrados: number = 0;
 
@@ -657,6 +582,12 @@ export class DecklistIndividualPage implements OnInit {
     }
   }
 
+  /**
+   * Comodín de alerta que le permite al usuario ingresar datos
+   * @param header texto de cabecera
+   * @param message texto de body
+   * @returns
+   */
   async presentAlertInput(header: string, message: string) {
     return new Promise<string | undefined>((resolve) => {
       this.alertController.create({
@@ -684,6 +615,12 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Comodín de alerta con un botón de guardar para reconfirmar
+   * @param header texto de cabecera
+   * @param message texto de body
+   * @returns
+   */
   async presentAlertGuardar(header: string, message: string) {
     return new Promise<string | undefined>((resolve) => {
       this.alertController.create({
@@ -716,6 +653,11 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Comodín de alerta
+   * @param header texto de cabecera
+   * @param message texto de body
+   */
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header,
@@ -728,6 +670,9 @@ export class DecklistIndividualPage implements OnInit {
   }
 
 
+  /**
+   * Copia la lista creada por el usuario al portapapeles, para hacer un simple control+V o "pegar" en algún chat o donde desee
+   */
   copyToClipboard() {
     let str = 'Reino: (total: ' + this.getTotalCartas(this.reino) + ')\n';
     this.getCartasUnicas(this.reino).forEach((carta) => {
@@ -768,10 +713,16 @@ export class DecklistIndividualPage implements OnInit {
 
   opcionesVisibles = false;
 
+  /**
+   * Muestra las opciones adicionales en el front (copiar al portapapeles, generar imagen, guardar decklist)
+   */
   toggleOpciones() {
     this.opcionesVisibles = !this.opcionesVisibles;
   }
 
+  /**
+   * Genera la imagen de la decklist, combinando las 3 imágenes individuales generadas por cada micro-componente
+   */
   async generarImagen() {
     let decklist: string;
     let nombreCompleto: string;
@@ -816,22 +767,37 @@ export class DecklistIndividualPage implements OnInit {
     }
   }
 
-
-
-
+  /**
+   * Imagen del Reino generada
+   * @param imageUrl imagen generada por el componente image-generator
+   */
   onImageGenerated(imageUrl: string) {
     this.imagenGenerada = imageUrl;
   }
 
+  /**
+   * Imagen de la Boveda generada
+   * @param imageUrl imagen generada por el componente image-boveda-deck
+   */
   onImageGeneratedBoveda(imageUrl: string) {
       this.imagenGeneradaBoveda = imageUrl;
   }
 
+  /**
+   * Imagen del Sidedeck generada
+   * @param imageUrl imagen generada por el componente image-sidedeck
+   */
   onImageGeneratedSideDeck(imageUrl: string) {
       this.imagenGeneradaSideDeck = imageUrl;
   }
 
 
+  /**
+   * Combina las 3 imágenes individuales en 1 sola grande
+   * @param img1Src imagen generada por image-generator
+   * @param img2Src imagen generada por image-boveda-deck
+   * @param img3Src imagen generada por image-sidedeck
+   */
   combinaImagenes(img1Src: string, img2Src: string, img3Src: string) {
     let canvas = document.createElement('canvas');
     let ctx = canvas.getContext('2d');
@@ -872,6 +838,12 @@ export class DecklistIndividualPage implements OnInit {
     });
   }
 
+  /**
+   * Descarga la imagen en el almacenamiento del telefono
+   * @param imageUrl la imagen final combinada
+   * @param imageName el nombre de la decklist
+   * @returns
+   */
   async downloadAndSaveImage(imageUrl: string, imageName: string) {
     // Verifica si la aplicación se está ejecutando en un dispositivo real
     if (!this.isRealDevice()) {
@@ -879,7 +851,7 @@ export class DecklistIndividualPage implements OnInit {
       return;
     }
 
-    // Descarga la imagen
+    // Descarga la imagen convirtiendola en base64 para que sea más liviano
     const response = await fetch(imageUrl);
     const blob = await response.blob();
     const arrayBuffer = await blob.arrayBuffer();
@@ -899,10 +871,19 @@ export class DecklistIndividualPage implements OnInit {
     this.presentAlert('Descargado!', 'Tu decklist fue descargada, podes verla en tus archivos recientes');
   }
 
+  /**
+   * Chequea si se está ejecutando en un telefono real
+   * @returns
+   */
   isRealDevice(): boolean {
     return this.platform.is('cordova') || this.platform.is('capacitor');
   }
 
+  /**
+   * Convierte la imagen a base64
+   * @param buffer
+   * @returns
+   */
   arrayBufferToBase64(buffer: ArrayBuffer): string {
     let binary = '';
     const bytes = new Uint8Array(buffer);
@@ -913,6 +894,10 @@ export class DecklistIndividualPage implements OnInit {
     return window.btoa(binary);
   }
 
+  /**
+   * Comodín de toast
+   * @param mensaje mensaje del toast
+   */
   async presentToast(mensaje: string) {
     const toast = await this.toastController.create({
       message: mensaje,

@@ -21,12 +21,15 @@ export class Tab3Page {
   constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute,
     private route: Router, private alertController: AlertController, private cdr: ChangeDetectorRef,) {}
 
-  usuarioLogeado: boolean = false;  // Variable para rastrear si hay un usuario logeado
+  usuarioLogeado: boolean = false;  // Variable para rastrear si hay un usuario logueado
 
+  /**
+   * Si hay un usuario logueado, busca si tiene decklists almacenadas en la base de datos asociadas a ese usuario
+   */
   ionViewWillEnter() {
     this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
       if (usuario && usuario.id) {  // Verifica si el objeto usuario y su id existen
-        this.usuarioLogeado = true;  // Actualiza la variable a true si hay un usuario logeado
+        this.usuarioLogeado = true;  // Actualiza la variable a true si hay un usuario logueado
         this.obtenerDecklists(usuario.id);
       } else {
         this.usuarioLogeado = false;
@@ -36,6 +39,10 @@ export class Tab3Page {
     });
   }
 
+  /**
+   * Busca las decklists del usuario logueado
+   * @param id id del jugador logueado
+   */
   obtenerDecklists(id: number) {
     this.conexion.getTodasLasDecklistsDeJugador(id).subscribe((dato) => {
       this.decklists = dato;
@@ -48,16 +55,26 @@ export class Tab3Page {
     });
   }
 
+  /**
+   * Redirige al componente para crear una decklist
+   */
   crearDeck() {
     this.route.navigate(['/tabs/tab3/decklist']);
   }
 
+  /**
+   * Redirige al componente para actualizar una decklist
+   * @param deck Objeto de decklist que se recupera del front para tocar el botón de editar
+   */
   editarDecklist(deck: Decklist) {
     this.route.navigate(['/tabs/tab3/decklist', deck.id]);
   }
 
+  /**
+   * Elimina una decklist
+   * @param deck Objeto de decklist que se recupera del front para tocar el botón de eliminar
+   */
   eliminarDecklist(deck: Decklist) {
-    // Crear y presentar el alerta de confirmación
     this.alertController.create({
       header: 'Confirmación',
       message: '¿Estás seguro de que quieres eliminar esta decklist?',
@@ -95,8 +112,5 @@ export class Tab3Page {
       ]
     }).then(alertElem => alertElem.present());
   }
-
-
-
 
 }

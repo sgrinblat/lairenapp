@@ -44,6 +44,9 @@ export class Tab1Page {
     });
   }
 
+  /**
+   * Al entrar al componente, si el usuario está logeado, consume el API de Contentful para recuperar entradas del blog
+   */
   ionViewWillEnter() {
     this.verElemento();
     if(this.verElemento() == true) {
@@ -51,7 +54,10 @@ export class Tab1Page {
     }
   }
 
-
+  /**
+   * Chequea si un elemento del front debe poder verse o no, conforme a si el usuario está logeado o no
+   * @returns boolean
+   */
   verElemento() {
     if(this.conexion.sesionIniciadaJugador()){
       return true;
@@ -60,11 +66,17 @@ export class Tab1Page {
     }
   }
 
+  /**
+   * Cierra sesión del usuario eliminando su info del localStorage
+   */
   cerrarSesion() {
     this.conexion.deslogear();
     this.presentToast("Has cerrado tu sesión");
   }
 
+  /**
+   * Toma los datos ingresados de los inputs del login, genera un token JWT para almacenar en el localStorage, y chequea también el rol del usuario (solo admite el logueo de un rol "jugador")
+   */
   onSubmit() {
     this.presentToast("Espere un momento por favor!");
 
@@ -108,7 +120,9 @@ export class Tab1Page {
     );
   }
 
-
+  /**
+   * Pide el mail al usuario para recuperar su contraseña. Le envía un link para recuperar la pass.
+   */
   async recuperarPass() {
     const alert = await this.alertController.create({
       header: 'Ingresa el email con el que registraste tu cuenta',
@@ -144,10 +158,19 @@ export class Tab1Page {
     await alert.present();
   }
 
+  /**
+   * Redirige al usuario a un componente donde se renderiza la entrada recuperada del blog
+   * @param id id de la entrada del blog
+   */
   verEntrada(id: string) {
     this.route.navigate(['/tabs/tab1/noticias', id]);
   }
 
+  /**
+   * Comodín para poner una alerta en el front
+   * @param header Mensaje de cabecera
+   * @param message Mensaje de cuerpo
+   */
   async presentAlert(header: string, message: string) {
     const alert = await this.alertController.create({
       header: header,
@@ -158,6 +181,10 @@ export class Tab1Page {
     await alert.present();
   }
 
+  /**
+   * Comodín para poner un toast en el front
+   * @param mensaje Mensaje de cuerpo
+   */
   async presentToast(mensaje: string) {
     const toast = await this.toastController.create({
       message: mensaje,
@@ -167,8 +194,6 @@ export class Tab1Page {
     });
     toast.present();
   }
-
-
 
 
 }

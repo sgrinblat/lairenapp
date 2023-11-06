@@ -6,10 +6,14 @@ import { ConexionService } from './conexion.service';
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor{
 
-  constructor(private conexion:ConexionService) {
+  constructor(private conexion:ConexionService) {}
 
-  }
-
+  /**
+   * Prohibe que un componente se vea a menos que el usuario está logueado
+   * @param req
+   * @param next
+   * @returns
+   */
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     let authReq = req;
     const token = this.conexion.getToken();

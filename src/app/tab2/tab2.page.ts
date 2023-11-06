@@ -32,6 +32,10 @@ export class Tab2Page {
 
   constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private renderer: Renderer2) {}
 
+  /**
+   * Obtiene de la base de datos:
+   * Todas las cartas, tipos, expansiones y rarezas (las rarezas las ordena de una forma especifica)
+   */
   ngOnInit(): void {
     this.obtenerCartas();
     this.expansiones = this.conexion.getTodasLasExpas();
@@ -53,6 +57,9 @@ export class Tab2Page {
     });
   }
 
+  /**
+   * Filtro de cartas según el nombre de la carta
+   */
   searchByText() {
     this.filteredCartas = this.cartas.filter(carta => {
       if(carta.nombreCarta.includes(this.searchText)) {
@@ -63,11 +70,20 @@ export class Tab2Page {
     });
   }
 
-
+  /**
+   * Busca una carta especifica en la base de datos para renderizarla en otro componente
+   * @param id id de la carta
+   */
   visualizarCarta(id: number) {
     this.route.navigate(['/tabs/tab2/carta', id]);
   }
 
+  /**
+   * Toma el texto de la carta y lo recorta para mostrarlo en el front
+   * @param texto texto de la carta
+   * @param limite cantidad de chars a mostrar en el front
+   * @returns el texto de la carta recortado
+   */
   acortarTexto(texto: string, limite: number = 35): string {
     if (texto.length <= limite) {
       return texto;
@@ -76,6 +92,10 @@ export class Tab2Page {
   }
 
 
+  /**
+   * Filtra las cartas acorde a la rareza seleccionada
+   * @param selectedRareza id de la rareza seleccionada
+   */
   onRarezaChange(selectedRareza: number) {
     this.selectedRareza = selectedRareza;
     if(this.selectedRareza == 0) {
@@ -85,6 +105,10 @@ export class Tab2Page {
     this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
+  /**
+   * Filtra las cartas acorde a la expansión seleccionada
+   * @param selectedExpansion id de la expansión seleccionada
+   */
   onExpansionChange(selectedExpansion: number) {
     this.selectedExpansion = selectedExpansion;
     if(this.selectedExpansion == 0) {
@@ -94,6 +118,10 @@ export class Tab2Page {
     this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
+  /**
+   * Filtra las cartas acorde al tipo de carta seleccionado
+   * @param selectedTipo id del tipo de carta seleccionado
+   */
   onTipoChange(selectedTipo: number) {
     this.selectedTipo = selectedTipo;
     if(this.selectedTipo == 0) {
@@ -103,6 +131,10 @@ export class Tab2Page {
     this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
+  /**
+   * Filtra las cartas acorde al coste de la carta seleccionado
+   * @param selectedCoste número de coste seleccionado
+   */
   onCosteChange(selectedCoste: number) {
     this.selectedCoste = selectedCoste;
     if(this.selectedCoste == 0) {
@@ -113,6 +145,9 @@ export class Tab2Page {
   }
 
 
+  /**
+   * Chequea cuántos filtros han sido seleccionados en simúltaneo, y va filtrando cartas acorde a ello
+   */
   filterCartas() {
     this.filteredCartas = this.cartas.filter(carta => {
       // Comprobación de si cada filtro está establecido (no '0' que es nuestro valor para 'Deseleccionar').
@@ -129,7 +164,9 @@ export class Tab2Page {
     });
   }
 
-
+  /**
+   * Recupera todas las cartas de la base de datos
+   */
   obtenerCartas() {
     this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
       this.cartas = dato;
@@ -138,6 +175,11 @@ export class Tab2Page {
     });
   }
 
+  /**
+   * De todas las cartas recuperadas, se observa los costes de las mismas para armar así el filtro de costes
+   * @param cartas objeto recuperado de cartas de la base de datos
+   * @returns lista numérica de cuantos costes existen
+   */
   getUniqueCostesCartas(cartas: Carta[]): number[] {
     let costes: number[] = cartas.map(carta => carta.costeCarta);
     let uniqueCostes: number[] = [...new Set(costes)];
