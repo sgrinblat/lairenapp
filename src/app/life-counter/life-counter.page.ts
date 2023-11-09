@@ -125,7 +125,7 @@ export class LifeCounterPage {
    */
   reproducirSonido() {
     // URL of the sound you want to play
-    const soundUrl = '../../assets/plop.mp3';
+    const soundUrl = '../../assets/click.mp3';
     this.playSound(soundUrl);
   }
 }
