@@ -6,6 +6,9 @@ import { KeepAwake } from '@capacitor-community/keep-awake';
   templateUrl: './life-counter.page.html',
   styleUrls: ['./life-counter.page.scss'],
 })
+
+
+
 export class LifeCounterPage {
   player1Life: number = 20;
   player2Life: number = 20;
@@ -16,6 +19,10 @@ export class LifeCounterPage {
   player1Timeout: any = null;
   player2Timeout: any = null;
 
+  private audioContext: AudioContext = new AudioContext();
+
+  constructor () {}
+
   /**
    * Actualiza la cantidad de vida del jugador para renderizar en pantalla
    * @param amount cantidad de vida a cambiar
@@ -23,9 +30,11 @@ export class LifeCounterPage {
    */
   changeLifeCount(amount: number, player: string) {
     if (player === 'player1') {
+      this.reproducirSonido();
       this.player1Life += amount;
       this.updateChangeCounter(amount, 'player1');
     } else {
+      this.reproducirSonido();
       this.player2Life += amount;
       this.updateChangeCounter(amount, 'player2');
     }
@@ -60,6 +69,7 @@ export class LifeCounterPage {
    * Regresa la vida a 20 para ambos jugadores
    */
   resetLife() {
+    this.reproducirSonido();
     this.player1Life = 20;
     this.player2Life = 20;
   }
@@ -86,4 +96,37 @@ export class LifeCounterPage {
     });
   }
 
+
+  /**
+   * Reproduce un sonido pasado por parámetro
+   * @param url ruta del sonido
+   */
+  async playSound(url: string) {
+    // Fetch the audio file data from the URL
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    // Decode the audio data
+    const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+
+    // Create an audio source
+    const source = this.audioContext.createBufferSource();
+    source.buffer = audioBuffer;
+
+    // Connect the source to the context's destination
+    source.connect(this.audioContext.destination);
+
+    // Play the audio
+    source.start();
+  }
+
+  /**
+   * Busca un sonido en los assets para reproducirlo
+   */
+  reproducirSonido() {
+    // URL of the sound you want to play
+    const soundUrl = '../../assets/plop.mp3';
+    this.playSound(soundUrl);
+  }
 }
+
