@@ -10,6 +10,7 @@ import { Tienda } from '../objetos/tienda';
 import { Decklist } from '../objetos/decklist';
 import { Role } from '../objetos/role';
 import { Jugador } from '../objetos/jugador';
+import { Subtipo } from '../objetos/subtipo';
 
 @Injectable({
   providedIn: 'root'
@@ -22,13 +23,14 @@ export class ConexionService {
 
   private cartaURL = `${this.urlBasica}/carta/cartas`;
   private cartaPublicaURL = `${this.urlBasica}/carta`;
-  private expansionURL = `${this.urlBasica}/expansion/expansiones`
-  private rarezaURL = `${this.urlBasica}/rareza/rarezas`
-  private tipoURL = `${this.urlBasica}/tipo/tipos`
-  private decklistURL = `${this.urlBasica}/decklist/decklists`
-  private usuarioURL = `${this.urlBasica}/usuarios/user/`
-  private tokenURL = `${this.urlBasica}/generate-token`
-  private tokenObtenerUserURL = `${this.urlBasica}/actual-usuario`
+  private expansionURL = `${this.urlBasica}/expansion/expansiones`;
+  private rarezaURL = `${this.urlBasica}/rareza/rarezas`;
+  private tipoURL = `${this.urlBasica}/tipo/tipos`;
+  private subtipoURL = `${this.urlBasica}/subtipo/subtipos`;
+  private decklistURL = `${this.urlBasica}/decklist/decklists`;
+  private usuarioURL = `${this.urlBasica}/usuarios/user/`;
+  private tokenURL = `${this.urlBasica}/generate-token`;
+  private tokenObtenerUserURL = `${this.urlBasica}/actual-usuario`;
 
   constructor(private httpClient: HttpClient) { }
 
@@ -276,5 +278,17 @@ export class ConexionService {
     localStorage.removeItem("location");
     return true;
   }
+
+  // ---------------------- SUBTIPOS ----------------------
+
+  getTodasLosSubTipos():Observable<Subtipo[]> {
+    return this.httpClient.get<Subtipo[]>(`${this.subtipoURL}`);
+  }
+
+  getSubTipoById(id:number): Observable<Subtipo> {
+    return this.httpClient.get<Subtipo>(`${this.subtipoURL}/${id}`);
+  }
+
+
 
 }

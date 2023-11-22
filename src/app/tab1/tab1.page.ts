@@ -35,11 +35,11 @@ export class Tab1Page {
     this.contactForm = fb.group({
       formularioNombreUsuario: [
         '',
-        [Validators.required, Validators.minLength(3)],
+        [Validators.required, Validators.minLength(5)],
       ],
       formularioPasswordUsuario: [
         '',
-        [Validators.required, Validators.minLength(3)],
+        [Validators.required, Validators.minLength(6)],
       ],
     });
   }

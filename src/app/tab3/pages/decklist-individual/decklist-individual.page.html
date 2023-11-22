@@ -162,24 +162,52 @@
       </ion-select>
     </ion-item>
 
+        <!-- Filtro de coste -->
+        <ion-item>
+          <ion-label>Coste</ion-label>
+          <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
+            <ion-select-option value="0" >Deseleccionar</ion-select-option>
+            <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
+          </ion-select>
+        </ion-item>
+
     <!-- Filtro de tipo -->
     <ion-item>
       <ion-label>Tipos</ion-label>
       <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
-        <ion-select-option value="">Selecciona un tipo de carta</ion-select-option>
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
       </ion-select>
     </ion-item>
 
-    <!-- Filtro de coste -->
+    <!-- Filtro de subtipo1 -->
     <ion-item>
-      <ion-label>Coste</ion-label>
-      <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)"
-        placeholder="Seleccione un coste">
-        <ion-select-option value="default">Selecciona un tipo de carta</ion-select-option>
-        <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
+      <ion-label>SubTipo</ion-label>
+      <ion-select [(ngModel)]="selectedSubTipo" (ionChange)="onSubTipoChange(selectedSubTipo)" placeholder="Selecciona un subtipo">
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
+        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
       </ion-select>
     </ion-item>
+
+            <!-- Filtro de subtipo2 -->
+    <ion-item>
+      <ion-label>SubTipo 2</ion-label>
+      <ion-select [(ngModel)]="selectedSubTipo2" (ionChange)="onSubTipo2Change(selectedSubTipo2)" placeholder="Selecciona un subtipo">
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
+        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Filtro de subtipo3 -->
+    <ion-item>
+      <ion-label>SubTipo 3</ion-label>
+      <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un subtipo">
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
+        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+
   </ion-list>
 
   <ion-grid>
@@ -193,7 +221,9 @@
   </ion-grid>
 
   <ion-grid
-  *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null && selectedCoste === null && (searchText === '' || searchText === null)">
+  *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null
+    && selectedSubTipo === null && selectedSubTipo2 === null && selectedSubTipo3 === null && selectedCoste === null
+    && (searchText === '' || searchText === null)">
     <ion-row>
       <ion-col size="6" *ngFor="let card of cartas" class="carta-container">
         <div class="carta-contenido">
@@ -205,7 +235,9 @@
 
 
   <ion-grid
-    *ngIf="filteredCartas.length === 0 && (selectedRareza || selectedExpansion || selectedTipo || selectedCoste || searchText)">
+  *ngIf="filteredCartas.length === 0 &&
+  (selectedRareza || selectedExpansion || selectedTipo || selectedSubTipo || selectedSubTipo2 || selectedSubTipo3
+  || selectedCoste || searchText)">
     <ion-row>
       <ion-col class="ion-text-center">
         <h2>No se han encontrado cartas con los filtros seleccionados.</h2>

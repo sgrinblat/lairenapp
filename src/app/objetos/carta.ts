@@ -1,5 +1,6 @@
 import { Expansion } from './expansion';
 import { Rareza } from './rareza';
+import { Subtipo } from './subtipo';
 import { Tipo } from './tipo';
 
 export class Carta {
@@ -25,4 +26,7 @@ export class Carta {
   expansion!: Expansion;
   rareza!: Rareza;
   tipo!: Tipo;
+  subtipo!: Subtipo;
+  subtipo2!: Subtipo;
+  subtipo3!: Subtipo;
 }
