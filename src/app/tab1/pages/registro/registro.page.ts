@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import { LoadingController } from '@ionic/angular';
+
 import { ActivatedRoute, Router } from '@angular/router';
 import { AlertController, ToastController } from '@ionic/angular';
 import { Usuario } from 'src/app/objetos/usuario';
@@ -17,7 +19,7 @@ export class RegistroPage {
 
   constructor(private alertController: AlertController, private conexion: ConexionService,
     private readonly fb: FormBuilder, private activatedRoute: ActivatedRoute,
-    private route: Router, private toastController: ToastController) {
+    private route: Router, private toastController: ToastController, private loadingController: LoadingController) {
     this.contactForm = fb.group({
       formularioUsernameUsuario: ['', [Validators.required, Validators.minLength(5)]],
       formularioPasswordUsuario: ['', [Validators.required, Validators.minLength(6), PasswordStrengthValidator()]],
@@ -31,30 +33,60 @@ export class RegistroPage {
   /**
    * Toma los valores ingresados de los inputs del formulario de registro y consume un metodo POST del API para registrar al usuario
    */
-  registrarse() {
-    this.presentToast("Espere un momento por favor!");
+  // registrarse() {
+  //   this.presentToast("Espere un momento por favor!");
+
+
+  //   this.conexion.postUsuario(this.user).subscribe(
+  //     (dato) => {
+  //       this.presentAlert('Registro exitoso', 'Verificá tu mail para confirmar la cuenta!');
+  //       this.route.navigate(['/tabs/tab1']);
+  //     },
+  //     (error) => {
+  //       if (error.status === 409) { // Chequea si ya existe el username registrado
+  //         this.presentAlert('Usuario existente', error.error.mensaje);
+  //       } else {
+  //         this.presentAlert('No se ha podido registrar', 'Contactanos para ver porqué no pudiste registrarte');
+  //       }
+  //       console.log("Qué estás buscando, picaron? " + error.message);
+  //     }
+  //   );
+
+  // }
+
+  async registrarse() {
+    const loading = await this.loadingController.create({
+      message: 'Espere un momento por favor...',
+      backdropDismiss: false
+    });
+    await loading.present();
+
+
     this.user.username = this.contactForm.value.formularioUsernameUsuario;
     this.user.password = this.contactForm.value.formularioPasswordUsuario;
     this.user.email = this.contactForm.value.formularioEmailUsuario;
     this.user.nombre = this.contactForm.value.formularioNombreUsuario;
     this.user.apellido = this.contactForm.value.formularioApellidoUsuario;
 
+
     this.conexion.postUsuario(this.user).subscribe(
-      (dato) => {
+      async (dato) => {
+        await loading.dismiss(); // Cierra el loader
         this.presentAlert('Registro exitoso', 'Verificá tu mail para confirmar la cuenta!');
         this.route.navigate(['/tabs/tab1']);
       },
-      (error) => {
+      async (error) => {
         if (error.status === 409) { // Chequea si ya existe el username registrado
           this.presentAlert('Usuario existente', error.error.mensaje);
         } else {
           this.presentAlert('No se ha podido registrar', 'Contactanos para ver porqué no pudiste registrarte');
         }
         console.log("Qué estás buscando, picaron? " + error.message);
+        await loading.dismiss();
       }
     );
-
   }
+
 
   /**
    * Comodín para poner una alerta en el front

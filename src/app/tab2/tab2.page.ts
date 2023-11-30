@@ -18,6 +18,7 @@ import { Subtipo } from '../objetos/subtipo';
 })
 export class Tab2Page {
 
+  searchName: string | null = null;
   searchText: string | null = null;
   selectedRareza: number | null = null;
   selectedExpansion: number | null = null;
@@ -34,6 +35,7 @@ export class Tab2Page {
   subtipos: Subtipo[] = [];
   costes: number[] = [];
   cantidadDeCartasMostrandose: number;
+  cantidadDeCartasMostrandose2: number;
 
   constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute, private route: Router, private renderer: Renderer2) {}
 
@@ -71,15 +73,23 @@ export class Tab2Page {
   /**
    * Filtro de cartas según el nombre de la carta
    */
-  searchByText() {
-    this.filteredCartas = this.cartas.filter(carta => {
-      if(carta.nombreCarta.includes(this.searchText)) {
-        return true;
-      } else {
-        return false;
-      }
-    });
+   searchByName() {
+    this.filteredCartas = this.cartas.filter(carta =>
+      carta.nombreCarta.includes(this.searchName)
+    );
+
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
+
+  searchByText() {
+    this.filteredCartas = this.cartas.filter(carta =>
+      carta.textoCarta.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+
+    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
+  }
+
+
 
   /**
    * Busca una carta especifica en la base de datos para renderizarla en otro componente

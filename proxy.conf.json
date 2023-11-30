@@ -1,0 +1,9 @@
+{
+  "/api/*": {
+    "target": "https://api.challonge.com",
+    "secure": false,
+    "logLevel": "debug",
+    "changeOrigin": true,
+    "pathRewrite": { "^/api": "" }
+  }
+}

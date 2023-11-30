@@ -81,6 +81,10 @@
             },
             "ci": {
               "progress": false
+            },
+            "options": {
+              "browserTarget": "lairenapp:build",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

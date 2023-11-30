@@ -6,8 +6,12 @@
 
 <ion-content color="dark" class="ion-padding">
 
-    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText" (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
+    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchName"
+    (ngModelChange)="searchName = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre de carta"></ion-searchbar>
+    <ion-button color="warning" expand="block" (click)="searchByName()">Buscar</ion-button>
 
+    <ion-searchbar name="buscadorTexto" id="buscadorTexto" [(ngModel)]="searchText"
+    (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar parte del texto de la carta"></ion-searchbar>
     <ion-button color="warning" expand="block" (click)="searchByText()">Buscar</ion-button>
 
 
@@ -86,6 +90,7 @@
   <section *ngIf="filteredCartas.length > 0" class="section section-xl text-center card-seccion">
     <h2>Se han encontrado {{cantidadDeCartasMostrandose}} cartas con los filtros seleccionados</h2>
   </section>
+
 
   <ion-grid>
     <ion-row *ngFor="let carta of filteredCartas">
