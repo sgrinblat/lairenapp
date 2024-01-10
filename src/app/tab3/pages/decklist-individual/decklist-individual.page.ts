@@ -2426,7 +2426,7 @@ export class DecklistIndividualPage implements OnInit {
     if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 7) {
       const alert = await this.alertController.create({
         header: 'Error',
-        message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
+        message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 7 cartas.',
         buttons: ['OK'],
         cssClass: 'my-custom-class',
       });
