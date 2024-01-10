@@ -73,6 +73,12 @@
     </div>
   </div>
 
+  <h2 class="text-center display-text mt-4 mb-4">Importar decklist</h2>
+  <div class="container">
+    <textarea [(ngModel)]="textoEntrada" class="textarea" placeholder="Pega la lista aquí"></textarea>
+  </div>
+  <ion-button (click)="procesarTexto()" color="warning" >Procesar</ion-button>
+
 </ion-content>
 
 <ion-row>
@@ -180,6 +186,15 @@
       </ion-select>
     </ion-item>
 
+    <!-- Filtro de supertipo -->
+    <ion-item>
+      <ion-label>Supertipo</ion-label>
+      <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un supertipo">
+        <ion-select-option value="0" >Deseleccionar</ion-select-option>
+        <ion-select-option *ngFor="let supertype of supertipo" [value]="supertype.idSubTipo">{{supertype.nombreSubTipo}}</ion-select-option>
+      </ion-select>
+    </ion-item>
+
     <!-- Filtro de subtipo1 -->
     <ion-item>
       <ion-label>SubTipo</ion-label>
@@ -198,14 +213,7 @@
       </ion-select>
     </ion-item>
 
-    <!-- Filtro de subtipo3 -->
-    <ion-item>
-      <ion-label>SubTipo 3</ion-label>
-      <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un subtipo">
-        <ion-select-option value="0" >Deseleccionar</ion-select-option>
-        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+
 
 
   </ion-list>

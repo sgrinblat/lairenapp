@@ -33,6 +33,7 @@ export class Tab2Page {
   rarezas: Rareza[] = [];
   tipos: Tipo[] = [];
   subtipos: Subtipo[] = [];
+  supertipo: Subtipo[] = [];
   costes: number[] = [];
   cantidadDeCartasMostrandose: number;
   cantidadDeCartasMostrandose2: number;
@@ -66,7 +67,8 @@ export class Tab2Page {
     this.conexion.getTodasLosSubTipos().pipe(
       map(subtipos => subtipos.sort((a, b) => a.nombreSubTipo.localeCompare(b.nombreSubTipo)))
     ).subscribe(subtipos => {
-      this.subtipos = subtipos;
+      this.supertipo = subtipos.filter(subtipo => subtipo.nombreSubTipo === 'REALEZA');
+      this.subtipos = subtipos.filter(subtipo => subtipo.nombreSubTipo !== 'REALEZA');
     });
   }
 

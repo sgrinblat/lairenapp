@@ -48,10 +48,14 @@ export class DecklistIndividualPage implements OnInit {
   rarezas: Rareza[] = [];
   tipos: Tipo[] = [];
   subtipos: Subtipo[] = [];
+  supertipo: Subtipo[] = [];
 
   reino: Carta[];
   boveda: Carta[];
   sidedeck: Carta[];
+
+  textoEntrada: string = '';
+  cartasPegadas: Carta[] = [];
 
   banderaLista = true;
   banderaEdicion = false;
@@ -105,6 +109,43 @@ export class DecklistIndividualPage implements OnInit {
     }).catch((error) => {
       console.error('Error al intentar permitir que la pantalla se apague', error);
     });
+  }
+
+
+  procesarTexto() {
+    const secciones = this.textoEntrada.split(/Reino:|Bóveda:|Side Deck:/).slice(1);
+
+    // Procesa cada sección
+    this.reino = this.procesarSeccion(secciones[0]);
+    this.boveda = this.procesarSeccion(secciones[1]);
+    this.sidedeck = this.procesarSeccion(secciones[2]);
+  }
+
+  procesarSeccion(seccion: string): Carta[] {
+    // Elimina espacios en blanco al inicio y final, luego divide por salto de línea
+    const lineas = seccion.trim().split(/\r?\n/);
+    const cartasEncontradas: Carta[] = [];
+
+    for (const linea of lineas) {
+      const lineaTrimmed = linea.trim();
+      if (!lineaTrimmed) {
+        continue; // Ignora líneas vacías
+      }
+
+      const partes = lineaTrimmed.split(' x');
+      const nombreCarta = partes[0];
+      const cantidad = partes.length > 1 ? parseInt(partes[1]) : 1;
+
+      const cartaEncontrada = this.cartas.find(carta => carta.nombreCarta === nombreCarta);
+
+      if (cartaEncontrada) {
+        for (let i = 0; i < cantidad; i++) {
+          cartasEncontradas.push(cartaEncontrada);
+        }
+      }
+    }
+
+    return cartasEncontradas;
   }
 
   /**
@@ -175,7 +216,8 @@ export class DecklistIndividualPage implements OnInit {
       this.conexion.getTodasLosSubTipos().pipe(
         map(subtipos => subtipos.sort((a, b) => a.nombreSubTipo.localeCompare(b.nombreSubTipo)))
       ).subscribe(subtipos => {
-        this.subtipos = subtipos;
+        this.supertipo = subtipos.filter(subtipo => subtipo.nombreSubTipo === 'REALEZA');
+        this.subtipos = subtipos.filter(subtipo => subtipo.nombreSubTipo !== 'REALEZA');
       });
   }
 
@@ -2179,23 +2221,28 @@ export class DecklistIndividualPage implements OnInit {
    */
   agregarCarta(carta: Carta) {
     if (this.banderaLista) {
-      if (carta.tipo.nombreTipo == 'TESORO' || carta.tipo.nombreTipo == 'TESORO - SAGRADO') {
-        const cantidadPrincipal = this.getCantidad(carta, this.boveda);
-        const cantidadSide = this.getCantidad(carta, this.sidedeck);
-        if (cantidadPrincipal + cantidadSide > 0) {
-
-          (async () => {
-            const alert = await this.alertController.create({
-              header: 'No tan rápido, general',
-              message: 'No puedes agregar a tu Bóveda más de 1 copia del mismo Tesoro!',
-              buttons: ['OK'],
-              cssClass: 'my-custom-class',
-            });
-
-            await alert.present();
-          })();
-
+      if (carta.tipo.nombreTipo == 'TESORO') {
+        if(carta.nombreCarta == "TESORO GENERICO") {
+          this.boveda.push(carta);
           return;
+        } else {
+          const cantidadPrincipal = this.getCantidad(carta, this.boveda);
+          const cantidadSide = this.getCantidad(carta, this.sidedeck);
+          if (cantidadPrincipal + cantidadSide > 0) {
+
+            (async () => {
+              const alert = await this.alertController.create({
+                header: 'No tan rápido, general',
+                message: 'No puedes agregar a tu Bóveda más de 1 copia del mismo Tesoro!',
+                buttons: ['OK'],
+                cssClass: 'my-custom-class',
+              });
+
+              await alert.present();
+            })();
+
+            return;
+          }
         }
 
         this.boveda.push(carta);
@@ -2238,28 +2285,29 @@ export class DecklistIndividualPage implements OnInit {
         });
       }
     } else {
-      if (
-        carta.tipo.nombreTipo == 'TESORO' ||
-        carta.tipo.nombreTipo == 'TESORO - SAGRADO'
-      ) {
-        const cantidadPrincipal = this.getCantidad(carta, this.boveda);
-        const cantidadSide = this.getCantidad(carta, this.sidedeck);
-        if (cantidadPrincipal + cantidadSide > 0) {
-
-          (async () => {
-            const alert = await this.alertController.create({
-              header: 'No tan rápido, general',
-              message: 'No puedes agregar a tu Side más de 1 copia del mismo Tesoro!',
-              buttons: ['OK'],
-              cssClass: 'my-custom-class',
-            });
-
-            await alert.present();
-          })();
-
+      if (carta.tipo.nombreTipo == 'TESORO') {
+        if(carta.nombreCarta == "TESORO GENERICO") {
+          this.sidedeck.push(carta);
           return;
-        }
+        } else {
+          const cantidadPrincipal = this.getCantidad(carta, this.boveda);
+          const cantidadSide = this.getCantidad(carta, this.sidedeck);
+          if (cantidadPrincipal + cantidadSide > 0) {
 
+            (async () => {
+              const alert = await this.alertController.create({
+                header: 'No tan rápido, general',
+                message: 'No puedes agregar a tu Side más de 1 copia del mismo Tesoro!',
+                buttons: ['OK'],
+                cssClass: 'my-custom-class',
+              });
+
+              await alert.present();
+            })();
+
+            return;
+          }
+        }
       } else if (carta.tipo.nombreTipo != 'TESORO' && carta.tipo.nombreTipo != 'TESORO - SAGRADO') {
         const cantidadPrincipal = this.getCantidad(carta, this.reino);
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
@@ -2355,9 +2403,12 @@ export class DecklistIndividualPage implements OnInit {
     let sagrados: number = 0;
 
     for (const item of this.boveda) {
-      if (item.tipo.nombreTipo === 'TESORO - SAGRADO') {
-        sagrados++;
+      if(item.subtipo) {
+        if (item.subtipo.nombreSubTipo.includes('SAGRADO')) {
+          sagrados++;
+        }
       }
+
     }
 
     if (sagrados > 3) {
@@ -2372,7 +2423,7 @@ export class DecklistIndividualPage implements OnInit {
       return;
     }
 
-    if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 10) {
+    if (this.reino.length < 45 || this.reino.length > 60 || this.boveda.length != 15 || this.sidedeck.length != 7) {
       const alert = await this.alertController.create({
         header: 'Error',
         message: 'Ten en cuenta que tu reino debe tener mínimo 45 cartas, máximo 60 cartas. Tu bóveda es de 15 cartas, y tu sidedeck es de 10 cartas.',
