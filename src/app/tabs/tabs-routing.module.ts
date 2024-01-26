@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { CalendarPageModule } from '../calendar/calendar.module';
 
 const routes: Routes = [
   {
@@ -24,6 +25,10 @@ const routes: Routes = [
       {
         path: 'life-counter',
         loadChildren: () => import('../life-counter/life-counter.module').then(m => m.LifeCounterPageModule)
+      },
+      {
+        path: 'calendar',
+        loadChildren: () => import('../calendar/calendar.module').then(m => m.CalendarPageModule)
       },
       {
         path: 'tab2',

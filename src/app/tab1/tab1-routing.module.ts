@@ -16,6 +16,7 @@ const routes: Routes = [
     loadChildren: () => import("./pages/entrada/entrada.module").then( m => m.EntradaPageModule)
   }
 
+
 ];
 
 @NgModule({

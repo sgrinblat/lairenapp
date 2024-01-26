@@ -11,6 +11,7 @@ import { Decklist } from '../objetos/decklist';
 import { Role } from '../objetos/role';
 import { Jugador } from '../objetos/jugador';
 import { Subtipo } from '../objetos/subtipo';
+import { Calendario } from '../objetos/calendario';
 
 @Injectable({
   providedIn: 'root'
@@ -31,6 +32,7 @@ export class ConexionService {
   private usuarioURL = `${this.urlBasica}/usuarios/user/`;
   private tokenURL = `${this.urlBasica}/generate-token`;
   private tokenObtenerUserURL = `${this.urlBasica}/actual-usuario`;
+  private calendarioPublicoURL = `${this.urlBasica}/calendario/eventos`;
 
   constructor(private httpClient: HttpClient) { }
 
@@ -290,5 +292,14 @@ export class ConexionService {
   }
 
 
+   // ---------------------- EVENTOS ----------------------
+
+  getEventosPorUbicacion():Observable<Calendario[]> {
+    return this.httpClient.get<Calendario[]>(`${this.calendarioPublicoURL}/ubicacion`);
+  }
+
+  getEventosPorFecha():Observable<Calendario[]> {
+    return this.httpClient.get<Calendario[]>(`${this.calendarioPublicoURL}/ordenados`);
+  }
 
 }

@@ -1,0 +1,42 @@
+<ion-header>
+  <ion-toolbar color="dark">
+    <ion-title>
+      Calendario
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content color="light">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large" class="text-center text-white">PRÓXIMOS EVENTOS</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-searchbar [(ngModel)]="filtroUbicacion" (ionChange)="filtrarPorUbicacion()" placeholder="Buscar por ubicación..."></ion-searchbar>
+
+  <ion-grid *ngIf="calendariosFiltrados.length > 0; else noData">
+    <ion-row>
+      <ion-col color="dark" class="text-center">- <ion-icon name="trophy"></ion-icon> -</ion-col>
+      <ion-col color="dark" class="text-center">- <ion-icon name="pricetag"></ion-icon> -</ion-col>
+      <ion-col color="dark" class="text-center">- <ion-icon name="people"></ion-icon> -</ion-col>
+      <ion-col color="dark" class="text-center">- <ion-icon name="location"></ion-icon> -</ion-col>
+      <ion-col color="dark" class="text-center">- <ion-icon name="calendar"></ion-icon> -</ion-col>
+    </ion-row>
+
+    <ion-row *ngFor="let calendario of calendariosFiltrados">
+      <ion-col color="dark" class="text-center texto">{{ calendario.titulo }}</ion-col>
+      <ion-col color="dark" class="text-center texto">{{ calendario.categoria }}</ion-col>
+      <ion-col color="dark" class="text-center texto">{{ calendario.organizador }}</ion-col>
+      <ion-col color="dark" class="text-center texto">{{ calendario.ubicacion }}</ion-col>
+      <ion-col color="dark" class="text-center texto">{{ calendario.fecha | date:'shortDate':'':'es' }}</ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ng-template #noData>
+    <ion-text color="light">
+      <p class="ion-text-center">No hay eventos disponibles.</p>
+    </ion-text>
+  </ng-template>
+</ion-content>
+

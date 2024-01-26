@@ -1,0 +1,65 @@
+ion-content {
+
+
+  ion-searchbar {
+    --placeholder-color: #8a8a8a; // Color para el placeholder
+    margin-bottom: 15px; // Espacio debajo de la barra de búsqueda
+  }
+
+  ion-grid {
+    --ion-grid-column-padding: 5px; // Reduce el espaciado de las columnas
+    font-size: 0.8rem; // Reduce el tamaño de fuente para mayor legibilidad
+
+    ion-row {
+      border: solid 1px #424242; // Borde sutil para cada "tarjeta"
+      border-radius: 10px; // Esquinas redondeadas
+      margin-bottom: 10px; // Espacio entre filas
+      padding: 10px 5px; // Acolchado interno para contenido
+
+      ion-col {
+        padding: 0 5px; // Acolchado horizontal para el contenido de la columna
+      }
+    }
+
+    ion-row.header-row {
+      font-weight: bold; // Texto en negrita para los encabezados
+    }
+  }
+}
+
+// Ajustes para elementos específicos en pantalla pequeña
+@media (min-width: 351px) and (max-width: 480px) {
+  ion-grid {
+    font-size: 0.9rem; // Tamaño de fuente más pequeño para pantallas muy pequeñas
+
+    ion-row {
+      padding: 5px; // Menos acolchado interno para maximizar el espacio
+    }
+
+    ion-icon {
+      font-size: 0.9em; // Tamaño de ícono ajustado para la legibilidad
+    }
+
+    .texto {
+      font-size: 0.8em;
+    }
+  }
+}
+
+@media (max-width: 350px) {
+  ion-grid {
+    font-size: 0.7rem; // Tamaño de fuente más pequeño para pantallas muy pequeñas
+
+    ion-row {
+      padding: 5px; // Menos acolchado interno para maximizar el espacio
+    }
+
+    ion-icon {
+      font-size: 0.7em; // Tamaño de ícono ajustado para la legibilidad
+    }
+
+    .texto {
+      font-size: 0.6em;
+    }
+  }
+}
