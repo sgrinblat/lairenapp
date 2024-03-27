@@ -1,0 +1,20 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Selecciona dos subtipos</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-item>
+    <ion-label>Subtipo 1</ion-label>
+    <ion-select [(ngModel)]="selectedSubtype1">
+      <ion-select-option *ngFor="let opcion of nombresSubtipoUnicos" [value]="opcion">{{ opcion }}</ion-select-option>
+    </ion-select>
+  </ion-item>
+  <ion-item>
+    <ion-label>Subtipo 2</ion-label>
+    <ion-select [(ngModel)]="selectedSubtype2">
+      <ion-select-option *ngFor="let opcion of nombresSubtipoUnicos" [value]="opcion">{{ opcion }}</ion-select-option>
+    </ion-select>
+  </ion-item>
+  <ion-button expand="block" (click)="confirmSelection()">Confirmar</ion-button>
+</ion-content>

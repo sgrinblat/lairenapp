@@ -22,6 +22,7 @@
   <ion-list>
     <!-- Filtro de expansión -->
     <ion-item>
+      <ion-label>Expansiones</ion-label>
       <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)" placeholder="Selecciona una expansión">
         <ion-select-option value="0" >Deseleccionar</ion-select-option>
         <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}

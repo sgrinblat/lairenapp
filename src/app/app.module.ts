@@ -6,16 +6,17 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import localeEs from '@angular/common/locales/es';
-import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
+import { IonicModule, IonicRouteStrategy, ModalController } from '@ionic/angular';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { authInterceptorProviders } from './services/auth.interceptor';
+import { SelectSubtypesModalComponent } from './select-subtypes-modal/select-subtypes-modal.component';
 
 registerLocaleData(localeEs);
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, SelectSubtypesModalComponent],
   imports: [
     BrowserModule,
     CommonModule,

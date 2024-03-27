@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { KeepAwake } from '@capacitor-community/keep-awake';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-life-counter',
@@ -21,7 +22,8 @@ export class LifeCounterPage {
 
   private audioContext: AudioContext = new AudioContext();
 
-  constructor () {}
+  constructor(private alertController: AlertController) { }
+
 
   /**
    * Actualiza la cantidad de vida del jugador para renderizar en pantalla
@@ -68,11 +70,34 @@ export class LifeCounterPage {
   /**
    * Regresa la vida a 20 para ambos jugadores
    */
-  resetLife() {
-    this.reproducirSonido();
-    this.player1Life = 20;
-    this.player2Life = 20;
-  }
+    async resetLife() {
+      const alert = await this.alertController.create({
+        header: 'Reiniciar Vida',
+        buttons: [
+          {
+            text: 'Reiniciar a 20 vidas',
+            handler: () => {
+              this.setLife(20);
+            }
+          },
+          {
+            text: 'Reiniciar a 40 vidas',
+            handler: () => {
+              this.setLife(40);
+            }
+          }
+        ]
+      });
+
+      await alert.present();
+    }
+
+    setLife(life: number) {
+      this.reproducirSonido();
+      this.player1Life = life;
+      this.player2Life = life;
+    }
+
 
   /**
    * Al ingresar a este componente, esto provoca que la pantalla no pueda apagarse por la config de energia del aparato

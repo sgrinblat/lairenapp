@@ -10,6 +10,7 @@ import { DecklistIndividualPage } from './decklist-individual.page';
 import { ImageGeneratorComponent } from './image-generator/image-generator.component';
 import { ImageBovedaDeckComponent } from './image-boveda-deck/image-boveda-deck.component';
 import { ImageSidedeckComponent } from './image-sidedeck/image-sidedeck.component';
+import { SelectSubtypesModalComponent } from 'src/app/select-subtypes-modal/select-subtypes-modal.component';
 
 @NgModule({
   imports: [

@@ -14,7 +14,7 @@ import { encode } from 'base64-arraybuffer';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 
 import { Plugins, PermissionState} from '@capacitor/core';
-import { Platform, ToastController } from '@ionic/angular';
+import { ModalController, Platform, ToastController } from '@ionic/angular';
 const { Permissions } = Plugins;
 
 import { AlertController } from '@ionic/angular';
@@ -23,6 +23,8 @@ import { ImageGeneratorComponent } from './image-generator/image-generator.compo
 import { ImageSidedeckComponent } from './image-sidedeck/image-sidedeck.component';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { Subtipo } from 'src/app/objetos/subtipo';
+import { SelectSubtypesModalComponent } from 'src/app/select-subtypes-modal/select-subtypes-modal.component';
+import { SelectMultipleControlValueAccessor } from '@angular/forms';
 
 @Component({
   selector: 'app-decklist-individual',
@@ -56,6 +58,7 @@ export class DecklistIndividualPage implements OnInit {
 
   textoEntrada: string = '';
   cartasPegadas: Carta[] = [];
+  nombresSubtipoUnicos: string[] = [];
 
   banderaLista = true;
   banderaEdicion = false;
@@ -73,6 +76,7 @@ export class DecklistIndividualPage implements OnInit {
     private platform: Platform,
     private cdr: ChangeDetectorRef,
     private toastController: ToastController,
+    public modalController: ModalController,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.reino = new Array<Carta>();
@@ -2160,12 +2164,26 @@ export class DecklistIndividualPage implements OnInit {
   /**
    * Recupera todas las cartas de la base de datos
    */
-   obtenerCartas() {
+  obtenerCartas() {
     this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
       this.cartas = dato;
       this.costes = this.getUniqueCostesCartas(this.cartas);
       this.costes = this.costes.sort((a, b) => b - a);
+
+      this.nombresSubtipoUnicos = this.extraerNombresSubtipoUnicos(this.cartas);
+      const opcionesAEliminar = ["RAPIDA", "SAGRADO", "COMUN", undefined, "REALEZA"];
+      this.nombresSubtipoUnicos = this.nombresSubtipoUnicos.filter(opcion => !opcionesAEliminar.includes(opcion));
     });
+  }
+
+  extraerNombresSubtipoUnicos(cartas: Carta[]): string[] {
+    const nombresSubtipo = new Set<string>();
+    cartas.forEach(carta => {
+      // Añadimos los nombres de subtipo de ambos campos a nuestro Set para garantizar unicidad
+      nombresSubtipo.add(carta.subtipo?.nombreSubTipo);
+      nombresSubtipo.add(carta.subtipo2?.nombreSubTipo);
+    });
+    return Array.from(nombresSubtipo).filter(nombre => nombre !== undefined).sort();
   }
 
   /**
@@ -2462,6 +2480,12 @@ export class DecklistIndividualPage implements OnInit {
       deck.sidedeck.push(deckListCarta);
     });
 
+    const isValidSubtypes = await this.presentSelectSubtypesModal();
+    if (!isValidSubtypes) {
+      await this.presentAlert('Más de 2 subtipos', 'La validación de subtipos ha fallado. Asegurate no estar usando más de 2 subtipos de unidad en el Reino y el Sidedeck.');
+      return;
+    }
+
     const portadaDecklist = await this.presentAlertInput('Ingresa una imagen', 'Guarda la URL de la imagen que quieres como portada para tu decklist (recomendamos usar un uploader de imagen como https://postimages.org)');
     if (portadaDecklist !== undefined) {
       deck.portadaDecklist = portadaDecklist;
@@ -2498,6 +2522,80 @@ export class DecklistIndividualPage implements OnInit {
       }
     }
   }
+
+
+  userSelection: string;
+
+
+
+  async presentSelectSubtypesModal(): Promise<boolean> {
+    const modal = await this.modalController.create({
+      component: SelectSubtypesModalComponent,
+      componentProps: { nombresSubtipoUnicos: this.nombresSubtipoUnicos }
+    });
+
+    await modal.present();
+    const { data } = await modal.onWillDismiss();
+
+    if (data) {
+      const isValid = this.validateSelections(data.selectedSubtype1, data.selectedSubtype2);
+      return isValid; // Devuelve el resultado de la validación.
+    }
+
+    return false; // Por defecto, devuelve false si no hay datos.
+  }
+
+
+  validateSelections(selectedSubtype1: string, selectedSubtype2: string): boolean {
+    const arraysParaRevisar = [this.reino, this.sidedeck];
+
+    for (const array of arraysParaRevisar) {
+      for (const carta of array) {
+        if ((carta.tipo.nombreTipo === "ACCION")) {
+          if(!carta.subtipo2) {
+            continue; // Ignoramos estas cartas según las reglas dadas
+          } else {
+            const subtipoAccion = selectedSubtype1.includes(carta.subtipo2?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo2?.nombreSubTipo);
+            if (!subtipoAccion) {
+              return false; // Detenemos la función si encontramos una no coincidencia
+            }
+          }
+        }
+
+        if(carta.tipo.nombreTipo === "UNIDAD") {
+          if(carta.subtipo.nombreSubTipo === "MIMETICO") {
+            continue;
+          }
+        }
+
+        if(carta.tipo.nombreTipo === "MONUMENTO") {
+          if(!carta.subtipo) {
+            continue; // Ignoramos estas cartas según las reglas dadas
+          } else {
+            const subtipoMonumento = selectedSubtype1.includes(carta.subtipo?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo?.nombreSubTipo);
+            if (!subtipoMonumento) {
+              return false; // Detenemos la función si encontramos una no coincidencia
+            }
+          }
+        }
+
+        if ((carta.tipo.nombreTipo === "TESORO")) {
+          continue; // Ignoramos estas cartas según las reglas dadas
+        }
+
+        // Chequeo de subtipos
+        const subtipoCoincide = selectedSubtype1.includes(carta.subtipo?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo2?.nombreSubTipo)
+        || selectedSubtype1.includes(carta.subtipo2?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo.nombreSubTipo);
+        if (!subtipoCoincide) {
+          return false; // Detenemos la función si encontramos una no coincidencia
+        }
+      }
+    }
+    return true;
+
+  }
+
+
 
   /**
    * Comodín de alerta que le permite al usuario ingresar datos

@@ -15,5 +15,35 @@ ion-content {
     padding-bottom: 35px !important;
   }
 
+  ion-modal ion-backdrop {
+    visibility: visible !important;
+    z-index: 20 !important; /* Asegúrate de que este valor sea mayor que el del contenido de la página pero menor que el del modal-wrapper */
+  }
+
+  .modal-wrapper {
+    top: 10%;
+    left: 10%;
+    height: 80%;
+    width: 80%;
+    position: absolute !important;
+    border-radius: 10px; /* Opcional, para bordes redondeados */
+  }
+
 
 }
+
+ion-modal ion-backdrop {
+  visibility: visible !important;
+  z-index: 20 !important; /* Asegúrate de que este valor sea mayor que el del contenido de la página pero menor que el del modal-wrapper */
+}
+
+.modal-wrapper {
+  top: 10%;
+  left: 10%;
+  height: 80%;
+  width: 80%;
+  position: absolute !important;
+  border-radius: 10px; /* Opcional, para bordes redondeados */
+}
+
+
