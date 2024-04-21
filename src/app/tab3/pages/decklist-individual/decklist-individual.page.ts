@@ -2238,6 +2238,7 @@ export class DecklistIndividualPage implements OnInit {
    * @returns
    */
   agregarCarta(carta: Carta) {
+    this.banderaEdicion = false;
     if (this.banderaLista) {
       if (carta.tipo.nombreTipo == 'TESORO') {
         if(carta.nombreCarta == "TESORO GENERICO") {
@@ -2496,6 +2497,7 @@ export class DecklistIndividualPage implements OnInit {
 
         this.conexion.getUsuarioActual().subscribe((usuario: Usuario) => {
           if (!this.banderaEdicion) {
+            this.banderaEdicion = true;
             this.conexion.crearDecklistJugador(deck, usuario.id).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido guardada.`);
@@ -2507,6 +2509,7 @@ export class DecklistIndividualPage implements OnInit {
               }
             );
           } else {
+            this.banderaEdicion = true;
             this.conexion.putDecklist(this.decklistId, deck).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido actualizada.`);
@@ -2689,7 +2692,10 @@ export class DecklistIndividualPage implements OnInit {
    * Copia la lista creada por el usuario al portapapeles, para hacer un simple control+V o "pegar" en algún chat o donde desee
    */
   copyToClipboard() {
-    let str = 'Reino: (total: ' + this.getTotalCartas(this.reino) + ')\n';
+    if(!this.banderaEdicion) {
+      this.presentAlert('Aún no!', `Por favor guarda primero para chequear si la decklist está bien`);
+    } else {
+      let str = 'Reino: (total: ' + this.getTotalCartas(this.reino) + ')\n';
     this.getCartasUnicas(this.reino).forEach((carta) => {
       str +=
         carta.nombreCarta + ' x' + this.getCantidad(carta, this.reino) + '\n';
@@ -2722,6 +2728,7 @@ export class DecklistIndividualPage implements OnInit {
         await alert.present();
       },
     );
+    }
 
   }
 
@@ -2739,45 +2746,49 @@ export class DecklistIndividualPage implements OnInit {
    * Genera la imagen de la decklist, combinando las 3 imágenes individuales generadas por cada micro-componente
    */
   async generarImagen() {
-    let decklist: string;
-    let nombreCompleto: string;
+    if(!this.banderaEdicion) {
+      this.presentAlert('Aún no!', `Por favor guarda primero para chequear si la decklist está bien`);
+    } else {
+      let decklist: string;
+      let nombreCompleto: string;
 
-    decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
-    if (decklist !== undefined) {
-      nombreCompleto = await this.presentAlertGuardar('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
-      if (nombreCompleto !== undefined) {
-        const image1Promise = new Promise<string>((resolve) => {
-          this.onImageGenerated = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        const image2Promise = new Promise<string>((resolve) => {
-          this.onImageGeneratedBoveda = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        const image3Promise = new Promise<string>((resolve) => {
-          this.onImageGeneratedSideDeck = (imageUrl: string) => {
-            resolve(imageUrl);
-          };
-          this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
-        });
-
-        // Esperar a que todas las imágenes estén generadas
-        Promise.all([image1Promise, image2Promise, image3Promise])
-          .then(([img1, img2, img3]) => {
-            this.combinaImagenes(img1, img2, img3);
-            this.banderaImagenGenerada = true;
-
-            this.presentAlert(
-              'Imagen generada correctamente',
-              `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`
-            );
+      decklist = await this.presentAlertInput('Pon un nombre para tu decklist', 'Ingresa el nombre de tu decklist');
+      if (decklist !== undefined) {
+        nombreCompleto = await this.presentAlertGuardar('Cuál es tu nombre y apellido?', 'Ingresa tu nombre y apellido completo');
+        if (nombreCompleto !== undefined) {
+          const image1Promise = new Promise<string>((resolve) => {
+            this.onImageGenerated = (imageUrl: string) => {
+              resolve(imageUrl);
+            };
+            this.imageGeneratorComponent.generarImagen(decklist, nombreCompleto);
           });
+
+          const image2Promise = new Promise<string>((resolve) => {
+            this.onImageGeneratedBoveda = (imageUrl: string) => {
+              resolve(imageUrl);
+            };
+            this.ImageBovedaDeckComponent.generarImagen(decklist, nombreCompleto);
+          });
+
+          const image3Promise = new Promise<string>((resolve) => {
+            this.onImageGeneratedSideDeck = (imageUrl: string) => {
+              resolve(imageUrl);
+            };
+            this.ImageSidedeckComponent.generarImagen(decklist, nombreCompleto);
+          });
+
+          // Esperar a que todas las imágenes estén generadas
+          Promise.all([image1Promise, image2Promise, image3Promise])
+            .then(([img1, img2, img3]) => {
+              this.combinaImagenes(img1, img2, img3);
+              this.banderaImagenGenerada = true;
+
+              this.presentAlert(
+                'Imagen generada correctamente',
+                `Ya puedes volver a presionar el botón para descargar la imagen de tu decklist ${decklist}!`
+              );
+            });
+        }
       }
     }
   }

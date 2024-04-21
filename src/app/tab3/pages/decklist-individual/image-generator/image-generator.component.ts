@@ -100,7 +100,7 @@ export class ImageGeneratorComponent {
       contenedor.style.height = '1000px';
     } else if (cantidad > 24 &&cantidad < 40) {
       contenedor.style.height = '900px';
-    } else if (cantidad > 19 && cantidad < 25) {
+    } else if (cantidad > 18 && cantidad < 25) {
       contenedor.style.height = '700px';
     } else {
       contenedor.style.height = '600px';
@@ -236,7 +236,7 @@ export class ImageGeneratorComponent {
         } else {
           yPosition += visiblePortion; // Mover posición vertical solo por la porción visible
         }
-      } else if (cantidad > 19 && cantidad < 25) {
+      } else if (cantidad > 18 && cantidad < 25) {
         if (currentInRow === 4) {
           currentInRow = 0; // Reiniciar contador de imágenes en fila
           xPosition += imageWidth + imageMargin; // Mover a la siguiente columna
