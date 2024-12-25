@@ -83,7 +83,7 @@ export class ImageSidedeckComponent {
     const mapaDeRepeticiones: { [nombre: string]: number } = {};
     for (const carta of this.sidedeck) {
 
-      if(carta.tipo.nombreTipo == "ACCION" || carta.tipo.nombreTipo == "ACCION - RAPIDA") {
+      if(carta.tipo.nombreTipo.startsWith("ACCION")) {
         acciones++;
       } else {
         if(carta.tipo.nombreTipo.startsWith("UNIDAD")) {
@@ -91,6 +91,10 @@ export class ImageSidedeckComponent {
         } else {
           if(carta.tipo.nombreTipo.startsWith("TESORO")) {
             tesoros++;
+          } else {
+            if(carta.tipo.nombreTipo.startsWith("MONUMENTO")) {
+              monumentos++;
+            }
           }
         }
       }
@@ -114,6 +118,15 @@ export class ImageSidedeckComponent {
         case 6:
             costeSeis++;
             break;
+        case 7:
+            costeSiete++;
+            break;
+        case 8:
+            costeOcho++;
+            break;
+        case 9:
+            costeNueve++;
+            break;
         default:
             // Código en caso de que no haya coincidencia con ningún caso anterior (opcional)
             break;
@@ -125,7 +138,7 @@ export class ImageSidedeckComponent {
       mapaDeRepeticiones[carta.nombreCarta]++;
     }
 
-    divMazo.textContent = `SideDeck: (Acciones: ${acciones} - Unidades: ${unidades} - Tesoros: ${tesoros}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco})`;
+    divMazo.textContent = `Sidedeck: (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
 
     // Inicializar las posiciones y el contador
     let xPosition = 0;
@@ -141,7 +154,7 @@ export class ImageSidedeckComponent {
     for (const [nombreCarta, repeticiones] of Object.entries(
       mapaDeRepeticiones
     )) {
-      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.jpg`;
+      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.webp`;
 
       // Creamos el contenedor para la carta y su etiqueta
       const contenedorCarta = document.createElement('div');

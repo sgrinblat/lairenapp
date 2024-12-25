@@ -20,4 +20,17 @@ ion-title {
   height: auto;
 }
 
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px; /* Ajusta el margen entre las opciones */
+}
+
+.checkbox-group ion-checkbox {
+  margin-right: 10px; /* Ajusta el margen entre el checkbox y el label */
+}
+
+.label {
+  margin-left: 5px;
+}
 

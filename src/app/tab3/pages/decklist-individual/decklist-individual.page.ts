@@ -62,11 +62,15 @@ export class DecklistIndividualPage implements OnInit {
 
   banderaLista = true;
   banderaEdicion = false;
+  banderaEdicionParaCopy = false;
   imagenGenerada: string;
   imagenGeneradaBoveda: string;
   imagenGeneradaSideDeck: string;
   imagenCombinada: string;
   banderaImagenGenerada: boolean = false;
+  filteredCartasNuevo: Carta[] = [];
+  banderaFiltroExcluyente: boolean = false;
+  banderaFiltroIncluyente: boolean = false;
 
   constructor(
     private conexion: ConexionService,
@@ -116,25 +120,59 @@ export class DecklistIndividualPage implements OnInit {
   }
 
 
+
   procesarTexto() {
     const secciones = this.textoEntrada.split(/Reino:|Bóveda:|Side Deck:/).slice(1);
 
-    // Procesa cada sección
-    this.reino = this.procesarSeccion(secciones[0]);
-    this.boveda = this.procesarSeccion(secciones[1]);
-    this.sidedeck = this.procesarSeccion(secciones[2]);
+    // Procesa cada sección temporalmente
+    const reinoTemporal = this.procesarSeccion(secciones[0]);
+    const bovedaTemporal = this.procesarSeccion(secciones[1]);
+    const sidedeckTemporal = this.procesarSeccion(secciones[2]);
+
+    // Realiza el chequeo después de procesar las secciones temporalmente
+    const cartasExcedidas = this.chequearCartasExcedidas([reinoTemporal, bovedaTemporal, sidedeckTemporal]);
+
+    if (cartasExcedidas.length > 0) {
+
+      (async () => {
+        const alert = await this.alertController.create({
+          header: 'Error en la lista',
+          message: `Las siguientes cartas tienen 5 o más unidades: ${cartasExcedidas.join(', ')}`,
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+
+        await alert.present();
+      })();
+
+      return;
+    }
+
+    // Si no hay fallas, asigna los valores a las propiedades definitivas
+    this.reino = reinoTemporal;
+    this.boveda = bovedaTemporal;
+    this.sidedeck = sidedeckTemporal;
+
+    (async () => {
+      const alert = await this.alertController.create({
+        header: '¡Éxito!',
+        message: 'La lista se ha procesado con éxito.',
+        buttons: ['OK'],
+        cssClass: 'my-custom-class',
+      });
+
+      await alert.present();
+    })();
+
   }
 
   procesarSeccion(seccion: string): Carta[] {
-    // Elimina espacios en blanco al inicio y final, luego divide por salto de línea
-    const lineas = seccion.trim().split(/\r?\n/);
+    const lineas = seccion.trim().split('\n');
     const cartasEncontradas: Carta[] = [];
 
     for (const linea of lineas) {
       const lineaTrimmed = linea.trim();
-      if (!lineaTrimmed) {
-        continue; // Ignora líneas vacías
-      }
+      if (!lineaTrimmed) continue; // Ignora líneas vacías
 
       const partes = lineaTrimmed.split(' x');
       const nombreCarta = partes[0];
@@ -150,6 +188,23 @@ export class DecklistIndividualPage implements OnInit {
     }
 
     return cartasEncontradas;
+  }
+
+  chequearCartasExcedidas(secciones: Carta[][]): string[] {
+    const conteoCartas: { [nombre: string]: number } = {};
+
+    // Sumar todas las cartas de las secciones
+    for (const seccion of secciones) {
+      for (const carta of seccion) {
+        if (!conteoCartas[carta.nombreCarta]) {
+          conteoCartas[carta.nombreCarta] = 0;
+        }
+        conteoCartas[carta.nombreCarta]++;
+      }
+    }
+
+    // Filtrar cartas con 5 o más unidades
+    return Object.keys(conteoCartas).filter(nombre => conteoCartas[nombre] >= 5);
   }
 
   /**
@@ -194,7 +249,7 @@ export class DecklistIndividualPage implements OnInit {
       }
     });
 
-    this.obtenerCartas();
+    this.soloDominacion();
     this.expansiones = this.conexion.getTodasLasExpas();
 
     this.conexion.getTodasLasRarezas().pipe(
@@ -215,6 +270,7 @@ export class DecklistIndividualPage implements OnInit {
       )
       .subscribe((tipos) => {
         this.tipos = tipos;
+        this.tipos = this.tipos.filter(tipo => tipo.idTipo !== 30);
       });
 
       this.conexion.getTodasLosSubTipos().pipe(
@@ -308,6 +364,113 @@ export class DecklistIndividualPage implements OnInit {
     this.filterCartas();
   }
 
+
+  soloDominacion() {
+    this.expansiones = this.conexion.getTodasLasExpasDominacion();
+
+    this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
+      // Filtra las cartas por visibilidad y expansión
+      this.cartas = dato.filter(carta => carta.expansion.visibilidad && carta.expansion.idExpansion !== 2);
+
+      // Excluye baneadas
+      this.cartas = this.cartas.filter(carta => carta.baneada == false);
+
+      this.cartas = this.cartas.filter(carta => carta.tipo.idTipo !== 30);
+
+      // Obtiene y ordena los costes únicos de las cartas
+      this.costes = this.getUniqueCostesCartas(this.cartas);
+      this.costes = this.costes.sort((a, b) => b - a);
+
+
+      this.nombresSubtipoUnicos = this.extraerNombresSubtipoUnicos(this.cartas);
+      const opcionesAEliminar = ["RAPIDA", "SAGRADO", "COMUN", undefined, "REALEZA"];
+      this.nombresSubtipoUnicos = this.nombresSubtipoUnicos.filter(opcion => !opcionesAEliminar.includes(opcion));
+
+      // Establece las cartas filtradas
+      this.filteredCartasNuevo = this.cartas;
+    });
+  }
+
+  filters = {
+    rareza: [] as string[],
+    tipo: [] as string[],
+    expansion: [] as string[],
+    subtipo: [] as string[],
+    subtipo2: [] as string[],
+    subtipo3: [] as string[],
+    costeCarta: [] as number[]
+  };
+
+
+  updateFilters(category: string, value: string | number, event: any): void {
+    if (event.target.checked) {
+      this.filters[category].push(value);
+    } else {
+      const index = this.filters[category].indexOf(value);
+      if (index > -1) {
+        this.filters[category].splice(index, 1);
+      }
+    }
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    this.filteredCartasNuevo = this.cartas.filter(carta => {
+      return (this.filters.rareza.length ? this.filters.rareza.includes(carta.rareza.nombreRareza) : true) &&
+             (this.filters.tipo.length ?
+                this.filters.tipo.includes(carta.tipo?.nombreTipo) ||
+                this.filters.tipo.includes(carta.tipo2?.nombreTipo)
+                : true) &&
+             (this.filters.expansion.length ? this.filters.expansion.includes(carta.expansion.nombreExpansion) : true) &&
+             (this.filters.subtipo.length ?
+               this.filters.subtipo.includes(carta.subtipo?.nombreSubTipo) ||
+               this.filters.subtipo.includes(carta.subtipo2?.nombreSubTipo) ||
+               this.filters.subtipo.includes(carta.subtipo3?.nombreSubTipo)
+               : true) &&
+             (this.filters.costeCarta.length ? this.filters.costeCarta.includes(carta.costeCarta) : true);
+    });
+  }
+
+  cambiarBanderaFiltro(sentido: boolean) {
+    if(sentido) {
+      this.banderaFiltroIncluyente = true;
+      this.banderaFiltroExcluyente = false;
+    } else {
+      this.banderaFiltroIncluyente = false;
+      this.banderaFiltroExcluyente = true;
+      this.filteredCartasNuevo = this.cartas;
+    }
+  }
+
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.accordion')) {
+      this.closeAllAccordions();
+    }
+  }
+
+  closeAllAccordions(): void {
+    const accordions = document.querySelectorAll('.accordion-collapse');
+    accordions.forEach(accordion => {
+      (accordion as HTMLElement).classList.remove('show');
+    });
+  }
+
+  isExpansionSelected(nombreExpansion: string): boolean {
+    return this.filters.expansion.includes(nombreExpansion);
+  }
+  isRarezaSelected(nombreRareza: string): boolean {
+    return this.filters.rareza.includes(nombreRareza);
+  }
+  isCosteSelected(costeCarta: number): boolean {
+    return this.filters.costeCarta.includes(costeCarta);
+  }
+  isTipoSelected(nombreTipo: string): boolean {
+    return this.filters.tipo.includes(nombreTipo);
+  }
+  isSubtipoSelected(nombreSubTipo: string): boolean {
+    return this.filters.subtipo.includes(nombreSubTipo);
+  }
 
   filterCartas() {
     this.filteredCartas = this.cartas.filter(carta => {
@@ -2166,7 +2329,8 @@ export class DecklistIndividualPage implements OnInit {
    */
   obtenerCartas() {
     this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
-      this.cartas = dato;
+      //this.cartas = dato;
+      this.cartas = dato.filter(carta => carta.expansion.visibilidad);
       this.costes = this.getUniqueCostesCartas(this.cartas);
       this.costes = this.costes.sort((a, b) => b - a);
 
@@ -2238,7 +2402,7 @@ export class DecklistIndividualPage implements OnInit {
    * @returns
    */
   agregarCarta(carta: Carta) {
-    this.banderaEdicion = false;
+    this.banderaEdicionParaCopy = true;
     if (this.banderaLista) {
       if (carta.tipo.nombreTipo == 'TESORO') {
         if(carta.nombreCarta == "TESORO GENERICO") {
@@ -2305,29 +2469,17 @@ export class DecklistIndividualPage implements OnInit {
       }
     } else {
       if (carta.tipo.nombreTipo == 'TESORO') {
-        if(carta.nombreCarta == "TESORO GENERICO") {
-          this.sidedeck.push(carta);
-          return;
-        } else {
-          const cantidadPrincipal = this.getCantidad(carta, this.boveda);
-          const cantidadSide = this.getCantidad(carta, this.sidedeck);
-          if (cantidadPrincipal + cantidadSide > 0) {
+        (async () => {
+          const alert = await this.alertController.create({
+            header: 'No tan rápido, general',
+            message: 'No puedes agregar tesoros a tu sidedeck!',
+            buttons: ['OK'],
+            cssClass: 'my-custom-class',
+          });
 
-            (async () => {
-              const alert = await this.alertController.create({
-                header: 'No tan rápido, general',
-                message: 'No puedes agregar a tu Side más de 1 copia del mismo Tesoro!',
-                buttons: ['OK'],
-                cssClass: 'my-custom-class',
-              });
-
-              await alert.present();
-            })();
-
-            return;
-          }
-        }
-      } else if (carta.tipo.nombreTipo != 'TESORO' && carta.tipo.nombreTipo != 'TESORO - SAGRADO') {
+          await alert.present();
+        })();
+      } else if (carta.tipo.nombreTipo != 'TESORO') {
         const cantidadPrincipal = this.getCantidad(carta, this.reino);
         const cantidadSide = this.getCantidad(carta, this.sidedeck);
 
@@ -2382,6 +2534,18 @@ export class DecklistIndividualPage implements OnInit {
     return lista.length;
   }
 
+  getTotalPuntajeBoveda(lista: Carta[]): number {
+    return lista.reduce((total, carta) => total + carta.numeroTesoro, 0);
+  }
+
+  agregarGenerico() {
+    let generico: Carta | undefined;
+    generico = this.cartas.find(carta => carta.idCarta === 175);
+    if (generico) {
+      this.boveda.push(generico);
+    }
+  }
+
   /**
    * Botón que el usuario selecciona para añadir cartas al sidedeck o al reino/boveda
    */
@@ -2419,21 +2583,33 @@ export class DecklistIndividualPage implements OnInit {
    * @returns
    */
   async guardarDecklist() {
-    let sagrados: number = 0;
+    // let sagrados: number = 0;
 
-    for (const item of this.boveda) {
-      if(item.subtipo) {
-        if (item.subtipo.nombreSubTipo.includes('SAGRADO')) {
-          sagrados++;
-        }
-      }
+    // for (const item of this.boveda) {
+    //   if(item.subtipo) {
+    //     if (item.subtipo.nombreSubTipo.includes('SAGRADO')) {
+    //       sagrados++;
+    //     }
+    //   }
 
-    }
+    // }
 
-    if (sagrados > 3) {
+    // if (sagrados > 3) {
+    //   const alert = await this.alertController.create({
+    //     header: 'Error',
+    //     message: 'No puedes tener más de 3 tesoros sagrados en tu decklist',
+    //     buttons: ['OK'],
+    //     cssClass: 'my-custom-class',
+    //   });
+
+    //   await alert.present();
+    //   return;
+    // }
+
+    if (this.getTotalPuntajeBoveda(this.boveda) > 30) {
       const alert = await this.alertController.create({
         header: 'Error',
-        message: 'No puedes tener más de 3 tesoros sagrados en tu decklist',
+        message: 'No puedes superar los 30 puntos en tu bóveda!',
         buttons: ['OK'],
         cssClass: 'my-custom-class',
       });
@@ -2460,26 +2636,60 @@ export class DecklistIndividualPage implements OnInit {
     deck.sidedeck = [];
     deck.fechaDecklist = new Date();
 
-    this.reino.forEach((element) => {
+    this.reino.forEach(async (element) => {
       let deckListCarta: DeckListCarta = new DeckListCarta();
-      deckListCarta.carta = element;
-      deckListCarta.tipo = 'reino';
-      deck.reino.push(deckListCarta);
+      if(element.baneada == true) {
+        const alert = await this.alertController.create({
+          header: 'Error',
+          message: `La carta ${element.nombreCarta} está prohibida en Dominación.`,
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+        await alert.present();
+        return;
+      } else {
+        deckListCarta.carta = element;
+        deckListCarta.tipo = 'reino';
+        deck.reino.push(deckListCarta);
+      }
     });
 
-    this.boveda.forEach((element) => {
+    this.boveda.forEach(async (element) => {
       let deckListCarta: DeckListCarta = new DeckListCarta();
-      deckListCarta.carta = element;
-      deckListCarta.tipo = 'boveda';
-      deck.boveda.push(deckListCarta);
+      if(element.baneada == true) {
+        const alert = await this.alertController.create({
+          header: 'Error',
+          message: `La carta ${element.nombreCarta} está prohibida en Dominación.`,
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+        await alert.present();
+        return;
+      } else {
+        deckListCarta.carta = element;
+        deckListCarta.tipo = 'boveda';
+        deck.boveda.push(deckListCarta);
+      }
     });
 
-    this.sidedeck.forEach((element) => {
+    this.sidedeck.forEach(async (element) => {
       let deckListCarta: DeckListCarta = new DeckListCarta();
-      deckListCarta.carta = element;
-      deckListCarta.tipo = 'sidedeck';
-      deck.sidedeck.push(deckListCarta);
+      if(element.baneada == true) {
+        const alert = await this.alertController.create({
+          header: 'Error',
+          message: `La carta ${element.nombreCarta} está prohibida en Dominación.`,
+          buttons: ['OK'],
+          cssClass: 'my-custom-class',
+        });
+        await alert.present();
+        return;
+      } else {
+        deckListCarta.carta = element;
+        deckListCarta.tipo = 'sidedeck';
+        deck.sidedeck.push(deckListCarta);
+      }
     });
+
 
     const isValidSubtypes = await this.presentSelectSubtypesModal();
     if (!isValidSubtypes) {
@@ -2501,6 +2711,7 @@ export class DecklistIndividualPage implements OnInit {
             this.conexion.crearDecklistJugador(deck, usuario.id).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido guardada.`);
+                this.banderaEdicionParaCopy = false;
                 this.cdr.detectChanges();
                 this.route.navigate(["/tabs/tab3"]);
               },
@@ -2513,6 +2724,7 @@ export class DecklistIndividualPage implements OnInit {
             this.conexion.putDecklist(this.decklistId, deck).subscribe(
               (dato) => {
                 this.presentAlert('Guardado!', `Tu decklist ${nombreDecklist} ha sido actualizada.`);
+                this.banderaEdicionParaCopy = false;
                 this.cdr.detectChanges();
                 this.route.navigate(["/tabs/tab3"]);
               },
@@ -2558,8 +2770,10 @@ export class DecklistIndividualPage implements OnInit {
           if(!carta.subtipo2) {
             continue; // Ignoramos estas cartas según las reglas dadas
           } else {
-            const subtipoAccion = selectedSubtype1.includes(carta.subtipo2?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo2?.nombreSubTipo);
-            if (!subtipoAccion) {
+            const subtipoAccion =
+            selectedSubtype1.includes(carta.subtipo2?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo2?.nombreSubTipo) ||
+            selectedSubtype1.includes(carta.subtipo?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo?.nombreSubTipo);
+                if (!subtipoAccion) {
               return false; // Detenemos la función si encontramos una no coincidencia
             }
           }
@@ -2575,8 +2789,11 @@ export class DecklistIndividualPage implements OnInit {
           if(!carta.subtipo) {
             continue; // Ignoramos estas cartas según las reglas dadas
           } else {
-            const subtipoMonumento = selectedSubtype1.includes(carta.subtipo?.nombreSubTipo) || selectedSubtype2.includes(carta.subtipo?.nombreSubTipo);
-            if (!subtipoMonumento) {
+            const subtipoMonumento = selectedSubtype1.includes(carta.subtipo?.nombreSubTipo) ||
+            selectedSubtype2.includes(carta.subtipo?.nombreSubTipo) ||
+                selectedSubtype1.includes(carta.subtipo2?.nombreSubTipo) ||
+                selectedSubtype2.includes(carta.subtipo2?.nombreSubTipo);
+                if (!subtipoMonumento) {
               return false; // Detenemos la función si encontramos una no coincidencia
             }
           }
@@ -2597,7 +2814,6 @@ export class DecklistIndividualPage implements OnInit {
     return true;
 
   }
-
 
 
   /**
@@ -2692,7 +2908,7 @@ export class DecklistIndividualPage implements OnInit {
    * Copia la lista creada por el usuario al portapapeles, para hacer un simple control+V o "pegar" en algún chat o donde desee
    */
   copyToClipboard() {
-    if(!this.banderaEdicion) {
+    if(this.banderaEdicionParaCopy) {
       this.presentAlert('Aún no!', `Por favor guarda primero para chequear si la decklist está bien`);
     } else {
       let str = 'Reino: (total: ' + this.getTotalCartas(this.reino) + ')\n';
@@ -2932,6 +3148,17 @@ export class DecklistIndividualPage implements OnInit {
       color: 'primary'
     });
     toast.present();
+  }
+
+  getCardImage(card: Carta): string {
+    // Retorna la ruta local de la carta
+    return `../../../../../assets/decklists/${card.nombreCarta}.webp`;
+  }
+
+  onImageError(event: Event, card: Carta): void {
+    // Cambia la imagen rota a la URL remota o una imagen predeterminada
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = card.urlImagen;
   }
 
 }

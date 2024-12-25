@@ -1,277 +1,444 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Creador de decklist</ion-title>
-  </ion-toolbar>
+    <ion-toolbar>
+        <ion-title>Creador de decklist</ion-title>
+    </ion-toolbar>
 </ion-header>
 
 
 <ion-content color="dark" class="ion-text-center ion-padding">
 
-  <ion-text>
-    <h1>Decklist</h1>
-    <h2 *ngIf="deck">
-      {{ deck?.nombreDecklist | uppercase }}
-    </h2>
-  </ion-text>
+    <ion-text>
+        <h1>Decklist</h1>
+        <h2 *ngIf="deck">
+            {{ deck?.nombreDecklist | uppercase }}
+        </h2>
+    </ion-text>
 
 
-  <div>
-    <h2>
-      Reino:
-      <span class="font-italic">(total: {{ getTotalCartas(reino) }})</span>
-    </h2>
+    <div>
+        <h2>
+            Reino:
+            <span class="font-italic">(total: {{ getTotalCartas(reino) }})</span>
+        </h2>
 
-    <div *ngFor="let carta of getCartasUnicas(reino)">
-      <ng-container *ngIf="carta.tipo.nombreTipo !== 'TESORO' && carta.tipo.nombreTipo !== 'TESORO - SAGRADO'">
-        <div class="flex-container">
-          <ion-text color="light">
-            <p>
-              {{ carta.nombreCarta }} x{{ getCantidad(carta, reino) }}
-            </p>
-          </ion-text>
-          <ion-button color="danger" (click)="eliminarCarta(carta, reino)">Eliminar</ion-button>
+        <div *ngFor="let carta of getCartasUnicas(reino)">
+            <ng-container *ngIf="carta.tipo.nombreTipo !== 'TESORO' && carta.tipo.nombreTipo !== 'TESORO - SAGRADO'">
+                <div class="flex-container">
+                    <ion-button color="danger" (click)="eliminarCarta(carta, reino)">-</ion-button>
+                    <ion-text color="light">
+                        <p>
+                            {{ carta.nombreCarta }} x{{ getCantidad(carta, reino) }}
+                        </p>
+                    </ion-text>
+                    <ion-button color="success" (click)="agregarCarta(carta)">+</ion-button>
+                </div>
+            </ng-container>
         </div>
-      </ng-container>
     </div>
-  </div>
 
-  <div>
-    <h2>
-      Bóveda:
-      <span class="font-italic">(total: {{ getTotalCartas(boveda) }})</span>
-    </h2>
-    <div *ngFor="let carta of getCartasUnicas(boveda)">
-      <ng-container *ngIf="carta.tipo.nombreTipo === 'TESORO' || carta.tipo.nombreTipo === 'TESORO - SAGRADO'">
-        <div class="flex-container">
-          <ion-text color="light">
-            <p>
-              {{ carta.nombreCarta }} x{{ getCantidad(carta, boveda) }}
-            </p>
-          </ion-text>
-          <ion-button color="danger" (click)="eliminarCarta(carta, boveda)">Eliminar</ion-button>
+    <div>
+        <h2>
+            Bóveda:
+            <span class="font-italic">(total: {{getTotalCartas(boveda)}}) - Puntaje: {{getTotalPuntajeBoveda(boveda)}}</span>
+        </h2>
+        <div *ngFor="let carta of getCartasUnicas(boveda)">
+            <ng-container *ngIf="carta.tipo.nombreTipo === 'TESORO' || carta.tipo.nombreTipo === 'TESORO - SAGRADO'">
+                <div class="flex-container">
+                    <ion-button color="danger" (click)="eliminarCarta(carta, boveda)">-</ion-button>
+                    <ion-text color="light">
+                        <p>
+                            {{carta.numeroTesoro}} puntos - {{carta.nombreCarta}} x{{getCantidad(carta, boveda)}}
+                        </p>
+                    </ion-text>
+                    <ion-button color="success" (click)="agregarCarta(carta)">+</ion-button>
+                </div>
+            </ng-container>
         </div>
-      </ng-container>
-    </div>
-  </div>
-
-  <div>
-    <h2>
-      Side deck:
-      <span class="font-italic">(total: {{ getTotalCartas(sidedeck) }})</span>
-    </h2>
-    <div *ngFor="let carta of getCartasUnicas(sidedeck)">
-      <ng-container>
-        <div class="flex-container">
-          <ion-text color="light">
-            <p>
-              {{ carta.nombreCarta }} x{{ getCantidad(carta, sidedeck) }}
-            </p>
-          </ion-text>
-          <ion-button color="danger" (click)="eliminarCarta(carta, sidedeck)">Eliminar</ion-button>
+        <div class="container d-flex align-items-center justify-content-center">
+            <button (click)="agregarGenerico()" class="btn btn-success mb-5">Agregar tesoro genérico</button>
         </div>
-      </ng-container>
     </div>
-  </div>
 
-  <h2 class="text-center display-text mt-4 mb-4">Importar decklist</h2>
-  <div class="container">
-    <textarea [(ngModel)]="textoEntrada" class="textarea" placeholder="Pega la lista aquí"></textarea>
-  </div>
-  <ion-button (click)="procesarTexto()" color="warning" >Procesar</ion-button>
+    <div>
+        <h2>
+            Side deck:
+            <span class="font-italic">(total: {{ getTotalCartas(sidedeck) }})</span>
+        </h2>
+        <div *ngFor="let carta of getCartasUnicas(sidedeck)">
+            <ng-container>
+                <div class="flex-container">
+                    <ion-button color="danger" (click)="eliminarCarta(carta, sidedeck)">-</ion-button>
+                    <ion-text color="light">
+                        <p>
+                            {{ carta.nombreCarta }} x{{ getCantidad(carta, sidedeck) }}
+                        </p>
+                    </ion-text>
+                    <ion-button color="success" (click)="agregarCarta(carta)">+</ion-button>
+                </div>
+            </ng-container>
+        </div>
+    </div>
+
+    <h2 class="text-center display-text mt-4 mb-4">Importar decklist</h2>
+    <div class="container">
+        <textarea [(ngModel)]="textoEntrada" class="textarea" placeholder="Pega la lista aquí"></textarea>
+    </div>
+    <ion-button (click)="procesarTexto()" color="warning">Procesar</ion-button>
 
 </ion-content>
 
 <ion-row>
-  <ion-col>
-    <div class="ion-text-center">
-      <ion-button color="tertiary" (click)="toggleOpciones()">
-        {{ opcionesVisibles ? 'Ocultar opciones' : 'Ver opciones' }}
-      </ion-button>
-    </div>
-  </ion-col>
+    <ion-col>
+        <div class="ion-text-center">
+            <ion-button color="tertiary" (click)="toggleOpciones()">
+                {{ opcionesVisibles ? 'Ocultar opciones' : 'Ver opciones' }}
+            </ion-button>
+        </div>
+    </ion-col>
 </ion-row>
 
 <ion-content [class.sin-fondo]="!opcionesVisibles" *ngIf="opcionesVisibles">
 
-    <ion-grid >
-      <ion-row>
-        <ion-col>
-          <div class="ion-text-center">
-            <ion-button color="primary" *ngIf="banderaLista" (click)="switchearEntreMainAndSidedeck()">
-              Agregar cartas al Sidedeck
-            </ion-button>
-            <ion-button color="primary" *ngIf="!banderaLista" (click)="switchearEntreMainAndSidedeck()">
-              Agregar cartas al mazo principal
-            </ion-button>
-          </div>
-        </ion-col>
+    <ion-grid>
+        <ion-row>
+            <ion-col>
+                <div class="ion-text-center">
+                    <ion-button color="primary" *ngIf="banderaLista" (click)="switchearEntreMainAndSidedeck()">
+                        Agregar cartas al Sidedeck
+                    </ion-button>
+                    <ion-button color="primary" *ngIf="!banderaLista" (click)="switchearEntreMainAndSidedeck()">
+                        Agregar cartas al mazo principal
+                    </ion-button>
+                </div>
+            </ion-col>
 
-        <ion-col>
-          <div class="ion-text-center">
-            <ion-button color="medium" (click)="copyToClipboard()">Copiar al portapapeles</ion-button>
-          </div>
-        </ion-col>
-      </ion-row>
-      <ion-row>
-        <ion-col>
-          <div class="ion-text-center">
-            <ion-button color="success" (click)="guardarDecklist()">Guardar decklist</ion-button>
-          </div>
-        </ion-col>
-        <ion-col>
-          <div class="ion-text-center">
-            <ion-button color="warning" *ngIf="!banderaImagenGenerada" (click)="generarImagen()">
-              Generar imagen de decklist
-            </ion-button>
+            <ion-col>
+                <div class="ion-text-center">
+                    <ion-button color="medium" (click)="copyToClipboard()">Copiar al portapapeles</ion-button>
+                </div>
+            </ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col>
+                <div class="ion-text-center">
+                    <ion-button color="success" (click)="guardarDecklist()">Guardar decklist</ion-button>
+                </div>
+            </ion-col>
+            <ion-col>
+                <div class="ion-text-center">
+                    <ion-button color="warning" *ngIf="!banderaImagenGenerada" (click)="generarImagen()">
+                        Generar imagen de decklist
+                    </ion-button>
 
-            <ion-button color="warning" *ngIf="banderaImagenGenerada" (click)="downloadAndSaveImage(imagenCombinada, 'imagenCombinada.jpg')">
-              Descargar imagen generada
-            </ion-button>
+                    <ion-button color="warning" *ngIf="banderaImagenGenerada" (click)="downloadAndSaveImage(imagenCombinada, 'imagenCombinada.jpg')">
+                        Descargar imagen generada
+                    </ion-button>
 
-          </div>
-        </ion-col>
-      </ion-row>
+                </div>
+            </ion-col>
+        </ion-row>
     </ion-grid>
 
 </ion-content>
 
 <ion-content color="dark" class="ion-padding">
-  <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText"
-    (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin"
-    placeholder="Ingresar nombre"></ion-searchbar>
+    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText" (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
 
-  <ion-button color="warning" expand="block" (click)="searchByText()">Buscar</ion-button>
+    <ion-button color="warning" expand="block" (click)="searchByText()">Buscar</ion-button>
 
-  <ion-text class="ion-margin-top ion-margin-bottom">
-    <h5>Ó puedes buscar seleccionando los siguientes filtros:</h5>
-  </ion-text>
+    <ion-text class="ion-margin-top ion-margin-bottom">
+        <h5>Ó puedes buscar seleccionando los siguientes filtros:</h5>
+    </ion-text>
 
-  <ion-list>
-    <!-- Filtro de expansión -->
-    <ion-item>
-      <ion-label>Expansiones</ion-label>
-      <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)"
-        placeholder="Selecciona una expansión">
-        <ion-select-option value="">Selecciona una expansión</ion-select-option>
-        <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
+    <ion-button expand="full" color="success" (click)="cambiarBanderaFiltro(true)" class="m-3">
+        Filtros
+    </ion-button>
 
-    <!-- Filtro de rareza -->
-    <ion-item>
-      <ion-label>Rarezas</ion-label>
-      <ion-select [(ngModel)]="selectedRareza" (ionChange)="onRarezaChange(selectedRareza)"
-        placeholder="Selecciona una rareza">
-        <ion-select-option value="">Selecciona una rareza</ion-select-option>
-        <ion-select-option *ngFor="let rare of rarezas" [value]="rare.idRareza">{{rare.nombreRareza}}
-        </ion-select-option>
-      </ion-select>
-    </ion-item>
+    <ion-grid *ngIf="banderaFiltroIncluyente">
+        <ion-row>
+            <!-- Tipo y Expansión -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="tipo">
+                        <ion-item slot="header">
+                            <ion-label>Tipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let tipo of tipos; let i = index">
+                                <ion-checkbox #checkbox [checked]="isTipoSelected(tipo.nombreTipo)" (ionChange)="updateFilters('tipo', tipo.nombreTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('tipo', tipo.nombreTipo, {target: {checked: checkbox.checked}})">{{ tipo.nombreTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+
+                    <ion-accordion value="expansion">
+                        <ion-item slot="header">
+                            <ion-label>Expansión</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let expansion of (expansiones | async); let i = index">
+                                <ion-checkbox #checkbox [checked]="isExpansionSelected(expansion.nombreExpansion)" (ionChange)="updateFilters('expansion', expansion.nombreExpansion, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('expansion', expansion.nombreExpansion, {target: {checked: checkbox.checked}})">{{ expansion.nombreExpansion }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
+
+            <!-- Rareza y Coste -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="rareza">
+                        <ion-item slot="header">
+                            <ion-label>Rareza</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let rareza of rarezas; let i = index">
+                                <ion-checkbox #checkbox [checked]="isRarezaSelected(rareza.nombreRareza)" (ionChange)="updateFilters('rareza', rareza.nombreRareza, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('rareza', rareza.nombreRareza, {target: {checked: checkbox.checked}})">{{ rareza.nombreRareza }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+
+                    <ion-accordion value="coste">
+                        <ion-item slot="header">
+                            <ion-label>Coste</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let coste of costes; let i = index">
+                                <ion-checkbox #checkbox [checked]="isCosteSelected(coste)" (ionChange)="updateFilters('costeCarta', coste, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('costeCarta', coste, {target: {checked: checkbox.checked}})">{{ coste }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
+
+            <!-- Subtipo -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="subtipo">
+                        <ion-item slot="header">
+                            <ion-label>Subtipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let subtipo of subtipos; let i = index">
+                                <ion-checkbox #checkbox [checked]="isSubtipoSelected(subtipo.nombreSubTipo)" (ionChange)="updateFilters('subtipo', subtipo.nombreSubTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('subtipo', subtipo.nombreSubTipo, {target: {checked: checkbox.checked}})">{{ subtipo.nombreSubTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
+        </ion-row>
+
+        <ion-row>
+            <ion-col>
+                <ion-card class="ion-padding">
+                    <ion-card-header>
+                        <ion-card-title>
+                            Se han encontrado {{ filteredCartasNuevo?.length }} cartas con los filtros añadidos
+                        </ion-card-title>
+                    </ion-card-header>
+                </ion-card>
+            </ion-col>
+        </ion-row>
+
+        <ion-row *ngFor="let card of filteredCartasNuevo">
+            <ion-col size="12" class="carta-container">
+                <div class="carta-contenido">
+                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="agregarCarta(card)"></ion-img>
+                </div>
+            </ion-col>
+        </ion-row>
+
+    </ion-grid>
+
+
+    <ion-list *ngIf="banderaFiltroExcluyente">
+        <!-- Filtro de expansión -->
+        <ion-item>
+            <ion-label>Expansiones</ion-label>
+            <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)" placeholder="Selecciona una expansión">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
+
+        <!-- Filtro de rareza -->
+        <ion-item>
+            <ion-label>Rarezas</ion-label>
+            <ion-select [(ngModel)]="selectedRareza" (ionChange)="onRarezaChange(selectedRareza)" placeholder="Selecciona una rareza">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let rare of rarezas" [value]="rare.idRareza">{{rare.nombreRareza}}
+                </ion-select-option>
+            </ion-select>
+        </ion-item>
 
         <!-- Filtro de coste -->
         <ion-item>
-          <ion-label>Coste</ion-label>
-          <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
-            <ion-select-option value="0" >Deseleccionar</ion-select-option>
-            <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
-          </ion-select>
+            <ion-label>Coste</ion-label>
+            <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
+            </ion-select>
         </ion-item>
 
-    <!-- Filtro de tipo -->
-    <ion-item>
-      <ion-label>Tipos</ion-label>
-      <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
-        <ion-select-option value="0" >Deseleccionar</ion-select-option>
-        <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+        <!-- Filtro de tipo -->
+        <ion-item>
+            <ion-label>Tipos</ion-label>
+            <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
+            </ion-select>
+        </ion-item>
 
-    <!-- Filtro de supertipo -->
-    <ion-item>
-      <ion-label>Supertipo</ion-label>
-      <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un supertipo">
-        <ion-select-option value="0" >Deseleccionar</ion-select-option>
-        <ion-select-option *ngFor="let supertype of supertipo" [value]="supertype.idSubTipo">{{supertype.nombreSubTipo}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+        <!-- Filtro de supertipo -->
+        <ion-item>
+            <ion-label>Supertipo</ion-label>
+            <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un supertipo">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let supertype of supertipo" [value]="supertype.idSubTipo">{{supertype.nombreSubTipo}}</ion-select-option>
+            </ion-select>
+        </ion-item>
 
-    <!-- Filtro de subtipo1 -->
-    <ion-item>
-      <ion-label>SubTipo</ion-label>
-      <ion-select [(ngModel)]="selectedSubTipo" (ionChange)="onSubTipoChange(selectedSubTipo)" placeholder="Selecciona un subtipo">
-        <ion-select-option value="0" >Deseleccionar</ion-select-option>
-        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+        <!-- Filtro de subtipo1 -->
+        <ion-item>
+            <ion-label>SubTipo</ion-label>
+            <ion-select [(ngModel)]="selectedSubTipo" (ionChange)="onSubTipoChange(selectedSubTipo)" placeholder="Selecciona un subtipo">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
+            </ion-select>
+        </ion-item>
 
-            <!-- Filtro de subtipo2 -->
-    <ion-item>
-      <ion-label>SubTipo 2</ion-label>
-      <ion-select [(ngModel)]="selectedSubTipo2" (ionChange)="onSubTipo2Change(selectedSubTipo2)" placeholder="Selecciona un subtipo">
-        <ion-select-option value="0" >Deseleccionar</ion-select-option>
-        <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
-      </ion-select>
-    </ion-item>
+        <!-- Filtro de subtipo2 -->
+        <ion-item>
+            <ion-label>SubTipo 2</ion-label>
+            <ion-select [(ngModel)]="selectedSubTipo2" (ionChange)="onSubTipo2Change(selectedSubTipo2)" placeholder="Selecciona un subtipo">
+                <ion-select-option value="0">Deseleccionar</ion-select-option>
+                <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
+            </ion-select>
+        </ion-item>
 
+    </ion-list>
 
-
-
-  </ion-list>
-
-  <ion-grid>
-    <ion-row >
-      <ion-col *ngFor="let carta of filteredCartas" class="carta-container" size="6">
-        <div class="carta-contenido">
-          <ion-img (click)="agregarCarta(carta)" class="carta" [src]="carta.urlImagen"></ion-img>
-        </div>
-      </ion-col>
+    <ion-row *ngIf="
+!(
+  selectedRareza ||
+  selectedExpansion ||
+  selectedTipo ||
+  selectedSubTipo ||
+  selectedSubTipo2 ||
+  selectedSubTipo3 ||
+  selectedCoste ||
+  searchText
+) && filteredCartas?.length === 0 && filteredCartasNuevo?.length === 0
+">
+        <ion-col>
+            <ion-card class="ion-padding">
+                <ion-card-header>
+                    <ion-card-title *ngIf="
+                !banderaFiltroExcluyente &&
+                !banderaFiltroIncluyente &&
+                searchText === null
+              ">
+                        Existen {{ cartas?.length }} cartas actualmente.
+                    </ion-card-title>
+                </ion-card-header>
+            </ion-card>
+        </ion-col>
     </ion-row>
-  </ion-grid>
 
-  <ion-grid
-  *ngIf="selectedRareza === null && selectedExpansion === null && selectedTipo === null
-    && selectedSubTipo === null && selectedSubTipo2 === null && selectedSubTipo3 === null && selectedCoste === null
-    && (searchText === '' || searchText === null)">
-    <ion-row>
-      <ion-col size="6" *ngFor="let card of cartas" class="carta-container">
-        <div class="carta-contenido">
-          <ion-img class="carta" (click)="agregarCarta(card)" [src]="card.urlImagen"></ion-img>
-        </div>
-      </ion-col>
+    <ion-row *ngIf="
+    banderaFiltroExcluyente &&
+    (searchByText !== null)
+  ">
+        <ion-col>
+            <ion-card class="ion-padding">
+                <ion-card-header>
+                    <ion-card-title *ngIf="
+                  !(
+                    selectedRareza ||
+                    selectedExpansion ||
+                    selectedTipo ||
+                    selectedSubTipo ||
+                    selectedSubTipo2 ||
+                    selectedSubTipo3 ||
+                    selectedCoste ||
+                    searchText
+                  ) && filteredCartas?.length === 0
+                ">
+                        Selecciona filtros para buscar
+                    </ion-card-title>
+                </ion-card-header>
+            </ion-card>
+        </ion-col>
     </ion-row>
-  </ion-grid>
 
+    <ion-grid *ngIf="
+  banderaFiltroExcluyente || searchByText !== null
+  ">
+        <ion-row *ngFor="let carta of filteredCartas">
+            <ion-col size="12" class="carta-container">
+                <div class="carta-contenido">
+                    <ion-img class="carta" [src]="getCardImage(carta)" [alt]="carta.nombreCarta" (error)="onImageError($event, carta)" (click)="agregarCarta(carta)"></ion-img>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
 
-  <ion-grid
-  *ngIf="filteredCartas.length === 0 &&
-  (selectedRareza || selectedExpansion || selectedTipo || selectedSubTipo || selectedSubTipo2 || selectedSubTipo3
-  || selectedCoste || searchText)">
-    <ion-row>
-      <ion-col class="ion-text-center">
-        <h2>No se han encontrado cartas con los filtros seleccionados.</h2>
-      </ion-col>
+    <ion-grid *ngIf="
+        selectedRareza === null &&
+        selectedExpansion === null &&
+        selectedTipo === null &&
+        selectedSubTipo === null &&
+        selectedSubTipo2 === null &&
+        selectedSubTipo3 === null &&
+        selectedCoste === null &&
+        (searchText === '' || searchText === null) &&
+        !banderaFiltroIncluyente &&
+        !banderaFiltroExcluyente
+      ">
+        <ion-row *ngFor="let card of cartas">
+            <ion-col size="12" class="carta-container">
+                <div class="carta-contenido">
+                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="agregarCarta(card)"></ion-img>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ion-grid>
+
+    <ion-row *ngIf="
+    filteredCartas?.length === 0 && filteredCartasNuevo?.length === 0 &&
+    (selectedRareza ||
+      selectedExpansion ||
+      selectedTipo ||
+      selectedSubTipo ||
+      selectedSubTipo2 ||
+      selectedSubTipo3 ||
+      selectedCoste ||
+      searchText)
+  ">
+        <ion-col>
+            <ion-card class="ion-padding">
+                <ion-card-header>
+                    <ion-card-title>
+                        No se han encontrado cartas con los filtros seleccionados.
+                    </ion-card-title>
+                </ion-card-header>
+            </ion-card>
+        </ion-col>
     </ion-row>
-  </ion-grid>
 
 </ion-content>
 
 
-  <app-image-generator
-    #imageGenerator
-    [reino]="reino"
-    (imageGenerated)="onImageGenerated($event)">
-  </app-image-generator>
+<app-image-generator #imageGenerator [reino]="reino" (imageGenerated)="onImageGenerated($event)">
+</app-image-generator>
 
-  <app-image-boveda-deck
-    #imageBoveda
-    [boveda]="boveda"
-    (imageGenerated)="onImageGeneratedBoveda($event)">
-  </app-image-boveda-deck>
+<app-image-boveda-deck #imageBoveda [boveda]="boveda" (imageGenerated)="onImageGeneratedBoveda($event)">
+</app-image-boveda-deck>
 
-  <app-image-sidedeck
-    #imageSideDeck
-    [sidedeck]="sidedeck"
-    (imageGenerated)="onImageGeneratedSideDeck($event)">
-  </app-image-sidedeck>
-
+<app-image-sidedeck #imageSideDeck [sidedeck]="sidedeck" (imageGenerated)="onImageGeneratedSideDeck($event)">
+</app-image-sidedeck>

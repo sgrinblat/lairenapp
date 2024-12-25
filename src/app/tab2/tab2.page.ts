@@ -28,6 +28,9 @@ export class Tab2Page {
   selectedSubTipo3: number | null = null;
   selectedCoste: number | null = null;
   filteredCartas: Carta[] = [];
+  filteredCartasNuevo: Carta[] = [];
+  banderaFiltroExcluyente: boolean = false;
+  banderaFiltroIncluyente: boolean = false;
   cartas!: Carta[];
   expansiones: Observable<Expansion[]>;
   rarezas: Rareza[] = [];
@@ -72,6 +75,119 @@ export class Tab2Page {
     });
   }
 
+  soloDominacion() {
+    this.expansiones = this.conexion.getTodasLasExpasDominacion();
+
+    this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
+      // Filtra las cartas por visibilidad y expansión
+      this.cartas = dato.filter(carta => carta.expansion.visibilidad && carta.expansion.idExpansion !== 2);
+
+
+    // Excluye baneadas
+    this.cartas = this.cartas.filter(carta => carta.baneada == false);
+
+    this.cartas = this.cartas.filter(carta => carta.tipo.idTipo !== 30);
+
+      // Obtiene y ordena los costes únicos de las cartas
+      this.costes = this.getUniqueCostesCartas(this.cartas);
+      this.costes = this.costes.sort((a, b) => b - a);
+      // Establece las cartas filtradas
+      this.filteredCartasNuevo = this.cartas;
+    });
+  }
+
+  getCardImage(card: Carta): string {
+    // Retorna la ruta local de la carta
+    return `../../../../assets/decklists/${card.nombreCarta}.webp`;
+  }
+
+  onImageError(event: Event, card: Carta): void {
+    // Cambia la imagen rota a la URL remota o una imagen predeterminada
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = card.urlImagen;
+  }
+
+  filters = {
+    rareza: [] as string[],
+    tipo: [] as string[],
+    expansion: [] as string[],
+    subtipo: [] as string[],
+    subtipo2: [] as string[],
+    subtipo3: [] as string[],
+    costeCarta: [] as number[]
+  };
+
+
+  updateFilters(category: string, value: string | number, event: any): void {
+    if (event.target.checked) {
+      this.filters[category].push(value);
+    } else {
+      const index = this.filters[category].indexOf(value);
+      if (index > -1) {
+        this.filters[category].splice(index, 1);
+      }
+    }
+    this.applyFilters();
+  }
+
+  applyFilters(): void {
+    this.filteredCartasNuevo = this.cartas.filter(carta => {
+      return (this.filters.rareza.length ? this.filters.rareza.includes(carta.rareza.nombreRareza) : true) &&
+             (this.filters.tipo.length ?
+                this.filters.tipo.includes(carta.tipo?.nombreTipo) ||
+                this.filters.tipo.includes(carta.tipo2?.nombreTipo)
+                : true) &&
+             (this.filters.expansion.length ? this.filters.expansion.includes(carta.expansion.nombreExpansion) : true) &&
+             (this.filters.subtipo.length ?
+               this.filters.subtipo.includes(carta.subtipo?.nombreSubTipo) ||
+               this.filters.subtipo.includes(carta.subtipo2?.nombreSubTipo) ||
+               this.filters.subtipo.includes(carta.subtipo3?.nombreSubTipo)
+               : true) &&
+             (this.filters.costeCarta.length ? this.filters.costeCarta.includes(carta.costeCarta) : true);
+    });
+  }
+
+  cambiarBanderaFiltro(sentido: boolean) {
+    if(sentido) {
+      this.banderaFiltroIncluyente = true;
+      this.banderaFiltroExcluyente = false;
+    } else {
+      this.banderaFiltroIncluyente = false;
+      this.banderaFiltroExcluyente = true;
+      this.filteredCartasNuevo = this.cartas;
+    }
+  }
+
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.accordion')) {
+      this.closeAllAccordions();
+    }
+  }
+
+  closeAllAccordions(): void {
+    const accordions = document.querySelectorAll('.accordion-collapse');
+    accordions.forEach(accordion => {
+      (accordion as HTMLElement).classList.remove('show');
+    });
+  }
+
+  isExpansionSelected(nombreExpansion: string): boolean {
+    return this.filters.expansion.includes(nombreExpansion);
+  }
+  isRarezaSelected(nombreRareza: string): boolean {
+    return this.filters.rareza.includes(nombreRareza);
+  }
+  isCosteSelected(costeCarta: number): boolean {
+    return this.filters.costeCarta.includes(costeCarta);
+  }
+  isTipoSelected(nombreTipo: string): boolean {
+    return this.filters.tipo.includes(nombreTipo);
+  }
+  isSubtipoSelected(nombreSubTipo: string): boolean {
+    return this.filters.subtipo.includes(nombreSubTipo);
+  }
+
   /**
    * Filtro de cartas según el nombre de la carta
    */
@@ -91,7 +207,9 @@ export class Tab2Page {
     this.cantidadDeCartasMostrandose = this.filteredCartas.length;
   }
 
-
+  irAlGlosario() {
+    this.route.navigate(['/tabs/tab2/glosario']);
+  }
 
   /**
    * Busca una carta especifica en la base de datos para renderizarla en otro componente
@@ -2051,7 +2169,8 @@ export class Tab2Page {
    */
   obtenerCartas() {
     this.conexion.getTodasLasCartasOrdenadas().subscribe((dato) => {
-      this.cartas = dato;
+      //this.cartas = dato;
+      this.cartas = dato.filter(carta => carta.expansion.visibilidad);
       this.costes = this.getUniqueCostesCartas(this.cartas);
       this.costes = this.costes.sort((a, b) => b - a);
     });

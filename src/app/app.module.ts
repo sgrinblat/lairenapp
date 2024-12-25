@@ -8,6 +8,8 @@ import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import localeEs from '@angular/common/locales/es';
 import { IonicModule, IonicRouteStrategy, ModalController } from '@ionic/angular';
 
+import { IonicStorageModule } from '@ionic/storage-angular'; // Importar Ionic Storage
+
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { authInterceptorProviders } from './services/auth.interceptor';
@@ -24,7 +26,8 @@ registerLocaleData(localeEs);
     FormsModule,
     HttpClientModule,
     AppRoutingModule,
-    IonicModule.forRoot()
+    IonicModule.forRoot(),
+    IonicStorageModule.forRoot() // Configurar Ionic Storage
   ],
   exports: [
     ReactiveFormsModule,

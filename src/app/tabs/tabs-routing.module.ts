@@ -40,6 +40,10 @@ const routes: Routes = [
           {
             path: 'carta/:id',
             loadChildren: () => import('../tab2/pages/carta-individual/carta-individual.module').then(m => m.CartaIndividualPageModule)
+          },
+          {
+            path: 'glosario',
+            loadChildren: () => import('../tab2/pages/glosario/glosario.module').then(m => m.GlosarioPageModule)
           }
         ]
       },

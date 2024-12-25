@@ -87,7 +87,7 @@ export class ImageBovedaDeckComponent {
     for (const [nombreCarta, repeticiones] of Object.entries(
       mapaDeRepeticiones
     )) {
-      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.jpg`;
+      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.webp`;
 
       // Creamos el contenedor para la carta y su etiqueta
       const contenedorCarta = document.createElement('div');

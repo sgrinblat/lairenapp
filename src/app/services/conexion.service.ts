@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from '@angular/common/http'
-import { Observable, Subject } from 'rxjs';
+import { map, Observable, Subject } from 'rxjs';
 import { Carta } from '../objetos/carta';
 import { Expansion } from '../objetos/expansion';
 import { Rareza } from '../objetos/rareza';
@@ -12,6 +12,7 @@ import { Role } from '../objetos/role';
 import { Jugador } from '../objetos/jugador';
 import { Subtipo } from '../objetos/subtipo';
 import { Calendario } from '../objetos/calendario';
+import { Glosario } from '../objetos/glosario';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +34,8 @@ export class ConexionService {
   private tokenURL = `${this.urlBasica}/generate-token`;
   private tokenObtenerUserURL = `${this.urlBasica}/actual-usuario`;
   private calendarioPublicoURL = `${this.urlBasica}/calendario/eventos`;
+  private glosarioPublicoURL = `${this.urlBasica}/glosario/keywords`;
+  private glosarioPrivateURL = `${this.urlBasica}/glosario/glosarios`;
 
   constructor(private httpClient: HttpClient) { }
 
@@ -75,7 +78,9 @@ export class ConexionService {
    * @returns lista de expansiones
    */
   getTodasLasExpas():Observable<Expansion[]> {
-    return this.httpClient.get<Expansion[]>(`${this.expansionURL}`);
+    return this.httpClient.get<Expansion[]>(this.expansionURL).pipe(
+      map(expansions => expansions.reverse())
+    );
   }
 
   /**
@@ -92,6 +97,12 @@ export class ConexionService {
    */
   getTodasLosTipos():Observable<Tipo[]> {
     return this.httpClient.get<Tipo[]>(`${this.tipoURL}`);
+  }
+
+  getTodasLasExpasDominacion(): Observable<Expansion[]> {
+    return this.httpClient.get<Expansion[]>(this.expansionURL).pipe(
+      map(expansions => expansions.filter(expansion => expansion.idExpansion !== 2).reverse())
+    );
   }
 
 
@@ -300,6 +311,29 @@ export class ConexionService {
 
   getEventosPorFecha():Observable<Calendario[]> {
     return this.httpClient.get<Calendario[]>(`${this.calendarioPublicoURL}/ordenados`);
+  }
+
+  // ---------------------- GLOSARIO ----------------------
+
+  getTodosLosKeywords():Observable<Glosario[]> {
+    return this.httpClient.get<Glosario[]>(`${this.glosarioPublicoURL}/todos`);
+  }
+
+  getKeywordById(id:number): Observable<Glosario> {
+    return this.httpClient.get<Glosario>(`${this.glosarioPublicoURL}/${id}`);
+  }
+
+  // este método nos sirve para registrar una tienda
+  postKeyword(keyword: Glosario) : Observable<Object> {
+    return this.httpClient.post(`${this.glosarioPrivateURL}/crear`, keyword);
+  }
+
+  deleteKeyword(id: number): Observable<Object> {
+    return this.httpClient.delete(`${this.glosarioPrivateURL}/eliminar/${id}`);
+  }
+
+  putKeyword(id: number, keyword: Glosario, ): Observable<Object> {
+    return this.httpClient.put(`${this.glosarioPrivateURL}/actualizar/${id}`, keyword);
   }
 
 }

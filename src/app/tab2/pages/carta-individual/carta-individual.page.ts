@@ -35,4 +35,25 @@ export class CartaIndividualPage implements OnInit {
       () => {}
     );
   }
+
+  getCardImage(card: Carta): string {
+    // Retorna la ruta local de la carta
+    return `../../../../../assets/decklists/${card.nombreCarta}.webp`;
+  }
+
+  onImageError(event: Event, card: Carta): void {
+    // Cambia la imagen rota a la URL remota o una imagen predeterminada
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = card.urlImagen;
+  }
+
+  visualizarCarta() {
+    this.router.navigate(['/tabs/tab1']);
+    setTimeout(() => {
+      console.log("Delayed for 0.1 second.");
+      this.router.navigate(['/tabs/tab2']);
+    }, 100); // 100 milisegundos
+  }
+
+
 }

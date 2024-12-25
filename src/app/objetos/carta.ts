@@ -12,6 +12,12 @@ export class Carta {
   flavorCarta!: string;
   rulingCarta!: string;
 
+  baneada!: boolean;
+
+  valorAtaque!: number;
+  valorDefensa!: number;
+  numeroTesoro!: number;
+
   urlImagen1!: string;
   urlImagen2!: string;
   urlImagen3!: string;
@@ -25,7 +31,10 @@ export class Carta {
 
   expansion!: Expansion;
   rareza!: Rareza;
+
   tipo!: Tipo;
+  tipo2!: Tipo;
+
   subtipo!: Subtipo;
   subtipo2!: Subtipo;
   subtipo3!: Subtipo;

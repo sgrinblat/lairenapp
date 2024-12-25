@@ -1,75 +1,191 @@
 .container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  justify-content: center;
-  color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    color: #fff;
 }
 
 .life-count {
-  font-size: 10em;
+    font-size: 10em;
 }
 
 .change-button {
-  font-size: 1.5em;
+    font-size: 1.5em;
 }
 
 .columna-boton-izquierdo {
-  margin-left: 1px;
+    margin-left: 1px;
 }
 
 .columna-boton-derecho {
-  margin-right: 1px;
+    margin-right: 1px;
 }
 
 .counter-section {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
 }
 
 .top .life-count {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
-.top, .bottom {
-  ion-col {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+.top,
+.bottom {
+    ion-col {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 }
 
 .top {
-  background-color: #181818;
+    background-color: #181818;
 }
 
 .bottom {
-  background-color: #d77d07;
-}
-
-.reset-button-container {
-  // display: flex;
-  justify-content: center;
-}
-
-.reset-button {
-  font-size: 1em; /* Ajusta este valor según sea necesario */
+    background-color: #d77d07;
 }
 
 ion-button {
-  font-size: 2em;
+    font-size: 2em;
 }
 
 .player1-counter {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
 
 .change-indicator {
-  font-size: 3em;
-  position: absolute;
-  padding-bottom: 30vh;
+    font-size: 3em;
+    position: absolute;
+    padding-bottom: 30vh;
 }
 
 
+/* Eliminar scroll de la pantalla principal cuando el historial está cerrado */
+
+.no-scroll {
+    overflow-y: hidden !important;
+    /* Fuerza a eliminar el scroll */
+}
+
+
+/* Estilo para el contenedor del historial a pantalla completa */
+
+.history-fullscreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #111111;
+    /* Fondo oscuro para el historial */
+    z-index: 10;
+    /* Asegura que esté por encima de otros elementos */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 80px;
+    /* Espacio para el botón de cierre */
+    overflow-y: auto;
+    /* Habilitar el scroll en el historial completo */
+}
+
+
+/* Ajustes para columnas del historial */
+
+.player-history-column {
+    padding: 0;
+    flex-direction: column;
+    align-items: center;
+}
+
+.button-group-container {
+    margin: 10px 0;
+}
+
+ion-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+    /* Ajusta el tamaño según sea necesario */
+}
+
+
+/* Estilos para los elementos del historial */
+
+.history-item {
+    width: 95%;
+    height: 50px;
+    margin: 15px 0;
+    padding: 5px;
+    border-radius: 8px;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    font-weight: bold;
+    text-align: center;
+    color: #fff;
+}
+
+
+/* Estilo para los ítems del Jugador 1 */
+
+.player1-item {
+    background-color: #5a5a5a;
+}
+
+
+/* Estilo para los ítems del Jugador 2 */
+
+.player2-item {
+    background-color: #d77d07;
+}
+
+
+/* Estilos para el selector de colores */
+
+.color-picker-grid {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.color-square {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+}
+
+
+/* Estilo para el botón de cierre */
+
+.close-button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+/* Asegurar que la lista de jugadores no cause scroll */
+
+ion-list {
+    width: 100%;
+    padding: 0;
+    /* Eliminar padding extra */
+    overflow: hidden;
+    /* Eliminar scroll interno */
+}
+
+.textoHistorial {
+    margin-left: 30%;
+}

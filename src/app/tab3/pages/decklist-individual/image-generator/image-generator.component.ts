@@ -39,11 +39,15 @@ export class ImageGeneratorComponent {
     const mapaDeRepeticiones: { [nombre: string]: number } = {};
     for (const carta of this.reino) {
 
-      if(carta.tipo.nombreTipo == "ACCION" || carta.tipo.nombreTipo == "ACCION - RAPIDA") {
+      if(carta.tipo.nombreTipo == "ACCION") {
         acciones++;
       } else {
         if(carta.tipo.nombreTipo.startsWith("UNIDAD")) {
           unidades++;
+        } else {
+          if(carta.tipo.nombreTipo.startsWith("MONUMENTO")) {
+            monumentos++;
+          }
         }
       }
 
@@ -107,7 +111,6 @@ export class ImageGeneratorComponent {
     }
 
     contenedor.style.width = '1160px';
-    contenedor.style.height = '1000px';
     contenedor.style.backgroundImage = 'url("../../../../../../assets/fondos/texture.png")';
     contenedor.style.backgroundSize = 'cover'; // La imagen cubre todo el contenedor
     contenedor.style.position = 'relative';
@@ -147,7 +150,7 @@ export class ImageGeneratorComponent {
     contenedor.appendChild(divMazo);
 
 
-    divMazo.textContent = `Reino: (Acciones: ${acciones} - Unidades: ${unidades}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco})`;
+    divMazo.textContent = `Reino: (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
 
     // Inicializar las posiciones y el contador
     let xPosition = 0;
@@ -163,7 +166,7 @@ export class ImageGeneratorComponent {
     for (const [nombreCarta, repeticiones] of Object.entries(
       mapaDeRepeticiones
     )) {
-      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.jpg`;
+      const rutaImagenLocal = `../../../../../../assets/decklists/${nombreCarta}.webp`;
 
       // Creamos el contenedor para la carta y su etiqueta
       const contenedorCarta = document.createElement('div');

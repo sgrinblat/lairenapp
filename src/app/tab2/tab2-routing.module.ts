@@ -10,6 +10,10 @@ const routes: Routes = [
   {
     path: 'carta-individual',
     loadChildren: () => import('./pages/carta-individual/carta-individual.module').then( m => m.CartaIndividualPageModule)
+  },
+  {
+    path: 'glosario',
+    loadChildren: () => import('./pages/glosario/glosario.module').then( m => m.GlosarioPageModule)
   }
 ];
 

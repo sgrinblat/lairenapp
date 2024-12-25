@@ -15,7 +15,7 @@ export class Tab3Page {
 
   decklists: Decklist[];
   tieneDecks: boolean = false;
-  defaultImage = '../../assets/fondos/mente-mejor.jpg';
+  defaultImage = '../../assets/fondos/portal.jpg';
 
 
   constructor(private conexion: ConexionService, private activatedRoute: ActivatedRoute,

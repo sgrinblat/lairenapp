@@ -20,7 +20,7 @@
     <preference name="SplashScreenDelay" value="3000" />
     <platform name="android">
         <preference name="android-minSdkVersion" value="21" />
-        <preference name="android-targetSdkVersion" value="30" />
+        <preference name="android-targetSdkVersion" value="34" />
         <preference name="Scheme" value="http" />
         <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest">
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
