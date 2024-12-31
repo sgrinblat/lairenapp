@@ -147,10 +147,75 @@ export class Tab2Page {
     });
   }
 
-  cambiarBanderaFiltro(sentido: boolean) {
-    if(sentido) {
+  updateStrictFilters(category: string, value: string | number, event: any): void {
+    if (event.target.checked) {
+      this.filters[category].push(value);
+    } else {
+      const index = this.filters[category].indexOf(value);
+      if (index > -1) {
+        this.filters[category].splice(index, 1);
+      }
+    }
+    this.applyStrictFilters();
+  }
+
+  applyStrictFilters(): void {
+    this.filteredCartasNuevo = this.cartas.filter(carta => {
+      // Verificar rareza: debe cumplir con TODAS las rarezas seleccionadas.
+      const rarezaCumple =
+        this.filters.rareza.length === 0 || this.filters.rareza.includes(carta.rareza.nombreRareza);
+
+      // Verificar tipo: debe cumplir con TODOS los tipos seleccionados.
+      const tipoCumple =
+        this.filters.tipo.length === 0 ||
+        this.filters.tipo.every(tipo =>
+          (carta.tipo && carta.tipo.nombreTipo === tipo) ||
+          (carta.tipo2 && carta.tipo2.nombreTipo === tipo)
+        );
+
+      // Verificar expansión: debe cumplir con TODAS las expansiones seleccionadas.
+      const expansionCumple =
+        this.filters.expansion.length === 0 || this.filters.expansion.includes(carta.expansion.nombreExpansion);
+
+      // Verificar subtipo: debe cumplir con TODOS los subtipos seleccionados.
+      const subtipoCumple =
+        this.filters.subtipo.length === 0 ||
+        this.filters.subtipo.every(subtipo =>
+          (carta.subtipo && carta.subtipo.nombreSubTipo === subtipo) ||
+          (carta.subtipo2 && carta.subtipo2.nombreSubTipo === subtipo) ||
+          (carta.subtipo3 && carta.subtipo3.nombreSubTipo === subtipo)
+        );
+
+      // Verificar costeCarta: debe cumplir con TODOS los costes seleccionados.
+      const costeCartaCumple =
+        this.filters.costeCarta.length === 0 || this.filters.costeCarta.includes(carta.costeCarta);
+
+      // Devuelve true solo si TODAS las condiciones son verdaderas.
+      return rarezaCumple && tipoCumple && expansionCumple && subtipoCumple && costeCartaCumple;
+    });
+  }
+
+
+  cambiarBanderaFiltro(sentido: boolean): void {
+    this.searchName = null;
+    this.searchText = null;
+
+    // Reiniciar filtros, asegurando que todos los campos requeridos estén presentes
+    this.filters = {
+      rareza: [],
+      tipo: [],
+      expansion: [],
+      subtipo: [],
+      subtipo2: [],
+      subtipo3: [],
+      costeCarta: []
+    };
+
+    // Actualizar banderas
+    if (sentido) {
       this.banderaFiltroIncluyente = true;
       this.banderaFiltroExcluyente = false;
+      this.filteredCartasNuevo = this.cartas;
     } else {
       this.banderaFiltroIncluyente = false;
       this.banderaFiltroExcluyente = true;
@@ -233,1838 +298,1762 @@ export class Tab2Page {
   }
 
 
-  /**
-   * Filtra las cartas acorde a la rareza seleccionada
-   * @param selectedRareza id de la rareza seleccionada
-   */
-  onRarezaChange(selectedRareza: number) {
-    this.selectedRareza = selectedRareza;
-    if(this.selectedRareza == 0) {
-      this.selectedRareza = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-
-  /**
-   * Filtra las cartas acorde a la expansión seleccionada
-   * @param selectedExpansion id de la expansión seleccionada
-   */
-  onExpansionChange(selectedExpansion: number) {
-    this.selectedExpansion = selectedExpansion;
-    if(this.selectedExpansion == 0) {
-      this.selectedExpansion = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-
-  /**
-   * Filtra las cartas acorde al tipo de carta seleccionado
-   * @param selectedTipo id del tipo de carta seleccionado
-   */
-  onTipoChange(selectedTipo: number) {
-    this.selectedTipo = selectedTipo;
-    if(this.selectedTipo == 0) {
-      this.selectedTipo = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-
-  /**
-   * Filtra las cartas acorde al coste de la carta seleccionado
-   * @param selectedCoste número de coste seleccionado
-   */
-  onCosteChange(selectedCoste: number) {
-    this.selectedCoste = selectedCoste;
-    if(this.selectedCoste == 0) {
-      this.selectedCoste = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-
-  onSubTipoChange(selectedSubTipo: number) {
-    this.selectedSubTipo = selectedSubTipo;
-    if(this.selectedSubTipo == 0) {
-      this.selectedSubTipo = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-  onSubTipo2Change(selectedSubTipo2: number) {
-    this.selectedSubTipo2 = selectedSubTipo2;
-    if(this.selectedSubTipo2 == 0) {
-      this.selectedSubTipo2 = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-  onSubTipo3Change(selectedSubTipo3: number) {
-    this.selectedSubTipo3 = selectedSubTipo3;
-    if(this.selectedSubTipo3 == 0) {
-      this.selectedSubTipo3 = null;
-    }
-    this.filterCartas();
-    this.cantidadDeCartasMostrandose = this.filteredCartas.length;
-  }
-
-
-  filterCartas() {
-    this.filteredCartas = this.cartas.filter(carta => {
-      // FILTRO DE 7
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 6
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedRareza !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedTipo !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedCoste !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedCoste !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedCoste !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedCoste !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedTipo !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedExpansion !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
-        ) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedExpansion !== null
-        && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
-        ) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedRareza !== null && this.selectedExpansion !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null
-        ) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedTipo !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 5
-      if(this.selectedExpansion !== null && this.selectedTipo !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-      // FILTRO DE 4
-      if(this.selectedRareza !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedExpansion !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedRareza !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedRareza !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo3 !== null && this.selectedRareza !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedTipo !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedTipo !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo3 !== null && this.selectedTipo !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedRareza !== null && this.selectedTipo !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedCoste !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.costeCarta
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.costeCarta
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedRareza !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.costeCarta
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedTipo !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedRareza !== null
-        && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedRareza !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedRareza !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedCoste !== null
-        && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
-        ) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-      // FILTRO DE 4
-      if(this.selectedExpansion !== null
-        && this.selectedSubTipo !== null && this.selectedTipo !== null && this.selectedRareza !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedExpansion !== null
-        && this.selectedSubTipo2 !== null && this.selectedTipo !== null && this.selectedRareza !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 4
-      if(this.selectedExpansion !== null
-        && this.selectedSubTipo3 !== null && this.selectedTipo !== null && this.selectedRareza !== null
-        ) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-
-
-
-
-      // FILTROS DE A 3
-      if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedExpansion !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedCoste !== null && this.selectedExpansion !== null && this.selectedRareza !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-
-
-      // FILTROS DE A 3
-      if(this.selectedRareza !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedRareza !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedRareza !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE A 3
-      if(this.selectedExpansion !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE A 3
-      if(this.selectedTipo !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE A 3
-      if(this.selectedCoste !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedCoste !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedCoste !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTRO DE 3
-      if(this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.tipo.idTipo == this.selectedTipo
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.tipo.idTipo == this.selectedTipo
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.tipo.idTipo == this.selectedTipo
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.tipo.idTipo == this.selectedTipo
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 3
-      if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      // FILTRO DE 3
-      if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo3, carta))
-          && carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-
-      // FILTROS DE A 2
-      if(this.selectedTipo !== null && this.selectedRareza !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.rareza.idRareza == this.selectedRareza
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedTipo !== null && this.selectedExpansion !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedTipo !== null && this.selectedCoste !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedRareza !== null && this.selectedCoste !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedExpansion !== null && this.selectedCoste !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && carta.costeCarta == this.selectedCoste
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedRareza !== null && this.selectedExpansion !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && carta.expansion.idExpansion == this.selectedExpansion
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedTipo !== null && this.selectedSubTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null && this.selectedSubTipo2 !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null && this.selectedSubTipo3 !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedRareza !== null && this.selectedSubTipo !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE A 2
-      if(this.selectedExpansion !== null && this.selectedSubTipo !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null && this.selectedSubTipo2 !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null && this.selectedSubTipo3 !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE A 2
-      if(this.selectedCoste !== null && this.selectedSubTipo !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
-        if(carta.costeCarta == this.selectedCoste
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      // FILTROS DE A 2
-      if(this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo2, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedSubTipo !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
-        if((this.compararSubtipos(this.selectedSubTipo2, carta))
-          && (this.compararSubtipos(this.selectedSubTipo3, carta))
-          )
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      //
-
-      // FILTROS DE 1
-      if(this.selectedRareza !== null) {
-        if(carta.rareza.idRareza == this.selectedRareza)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedExpansion !== null) {
-        if(carta.expansion.idExpansion == this.selectedExpansion)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-      if(this.selectedTipo !== null) {
-        if(carta.tipo.idTipo == this.selectedTipo)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedCoste !== null) {
-        if(carta.costeCarta == this.selectedCoste)
-          {
-            return true;
-          } else {
-            return false;
-          }
-      }
-
-      if(this.selectedSubTipo !== null) {
-        return this.compararSubtipos(this.selectedSubTipo, carta);
-      }
-      if(this.selectedSubTipo2 !== null) {
-        return this.compararSubtipos(this.selectedSubTipo2, carta);
-      }
-      if(this.selectedSubTipo3 !== null) {
-        return this.compararSubtipos(this.selectedSubTipo3, carta);
-      }
-
-      return false;
-    });
-  }
+
+
+  // filterCartas() {
+  //   this.filteredCartas = this.cartas.filter(carta => {
+  //     // FILTRO DE 7
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 6
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedCoste !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedTipo !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedCoste !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedCoste !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedCoste !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedCoste !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedExpansion !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
+  //       ) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedExpansion !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
+  //       ) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedRareza !== null && this.selectedExpansion !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null
+  //       ) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedSubTipo !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 5
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+
+  //     // FILTRO DE 4
+  //     if(this.selectedRareza !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedExpansion !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedRareza !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedRareza !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedRareza !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedTipo !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedTipo !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedTipo !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedRareza !== null && this.selectedTipo !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedCoste !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.costeCarta
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedCoste !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.costeCarta
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedCoste !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.costeCarta
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedTipo !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedRareza !== null
+  //       && this.selectedSubTipo !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedRareza !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedRareza !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedExpansion !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedCoste !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedSubTipo2 !== null && this.selectedTipo !== null
+  //       ) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+
+  //     // FILTRO DE 4
+  //     if(this.selectedExpansion !== null
+  //       && this.selectedSubTipo !== null && this.selectedTipo !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedExpansion !== null
+  //       && this.selectedSubTipo2 !== null && this.selectedTipo !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 4
+  //     if(this.selectedExpansion !== null
+  //       && this.selectedSubTipo3 !== null && this.selectedTipo !== null && this.selectedRareza !== null
+  //       ) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+
+
+
+
+
+  //     // FILTROS DE A 3
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedExpansion !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedRareza !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedCoste !== null && this.selectedExpansion !== null && this.selectedRareza !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+
+
+  //     // FILTROS DE A 3
+  //     if(this.selectedRareza !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedRareza !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedRareza !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE A 3
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE A 3
+  //     if(this.selectedTipo !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedTipo !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedTipo !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE A 3
+  //     if(this.selectedCoste !== null && this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedCoste !== null && this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedCoste !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTRO DE 3
+  //     if(this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedCoste !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedTipo !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedExpansion !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 3
+  //     if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedRareza !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     // FILTRO DE 3
+  //     if(this.selectedTipo !== null && this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         && carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedTipo !== null && this.selectedRareza !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.rareza.idRareza == this.selectedRareza
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedTipo !== null && this.selectedExpansion !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedTipo !== null && this.selectedCoste !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedRareza !== null && this.selectedCoste !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedExpansion !== null && this.selectedCoste !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && carta.costeCarta == this.selectedCoste
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedRareza !== null && this.selectedExpansion !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && carta.expansion.idExpansion == this.selectedExpansion
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedTipo !== null && this.selectedSubTipo !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedTipo !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedRareza !== null && this.selectedSubTipo !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedRareza !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedRareza !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedExpansion !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedCoste !== null && this.selectedSubTipo !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedCoste !== null && this.selectedSubTipo2 !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedCoste !== null && this.selectedSubTipo3 !== null) {
+  //       if(carta.costeCarta == this.selectedCoste
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     // FILTROS DE A 2
+  //     if(this.selectedSubTipo !== null && this.selectedSubTipo2 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedSubTipo !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedSubTipo2 !== null && this.selectedSubTipo3 !== null) {
+  //       if((this.compararSubtipos(this.selectedSubTipo2, carta))
+  //         && (this.compararSubtipos(this.selectedSubTipo3, carta))
+  //         )
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     //
+
+  //     // FILTROS DE 1
+  //     if(this.selectedRareza !== null) {
+  //       if(carta.rareza.idRareza == this.selectedRareza)
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedExpansion !== null) {
+  //       if(carta.expansion.idExpansion == this.selectedExpansion)
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+  //     if(this.selectedTipo !== null) {
+  //       if(carta.tipo.idTipo == this.selectedTipo)
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     if(this.selectedCoste !== null) {
+  //       if(carta.costeCarta == this.selectedCoste)
+  //         {
+  //           return true;
+  //         } else {
+  //           return false;
+  //         }
+  //     }
+
+  //     if(this.selectedSubTipo !== null) {
+  //       return this.compararSubtipos(this.selectedSubTipo, carta);
+  //     }
+  //     if(this.selectedSubTipo2 !== null) {
+  //       return this.compararSubtipos(this.selectedSubTipo2, carta);
+  //     }
+  //     if(this.selectedSubTipo3 !== null) {
+  //       return this.compararSubtipos(this.selectedSubTipo3, carta);
+  //     }
+
+  //     return false;
+  //   });
+  // }
 
   /**
    * Chequea cuántos filtros han sido seleccionados en simúltaneo, y va filtrando cartas acorde a ello

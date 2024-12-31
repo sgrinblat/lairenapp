@@ -142,7 +142,11 @@
 </ion-content>
 
 <ion-content color="dark" class="ion-padding">
-    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText" (ngModelChange)="searchText = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
+    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchName" (ngModelChange)="searchName = $event.toUpperCase()" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
+
+    <ion-button color="warning" expand="block" (click)="searchByName()">Buscar</ion-button>
+
+    <ion-searchbar name="buscadorNombre" id="buscadorNombre" [(ngModel)]="searchText" show-clear-button="always" clear-icon="trash-bin" placeholder="Ingresar nombre"></ion-searchbar>
 
     <ion-button color="warning" expand="block" (click)="searchByText()">Buscar</ion-button>
 
@@ -151,7 +155,10 @@
     </ion-text>
 
     <ion-button expand="full" color="success" (click)="cambiarBanderaFiltro(true)" class="m-3">
-        Filtros
+        Filtros por inclusión
+    </ion-button>
+    <ion-button expand="full" color="success" (click)="cambiarBanderaFiltro(false)" class="m-3">
+        Filtros por exclusión
     </ion-button>
 
     <ion-grid *ngIf="banderaFiltroIncluyente">
@@ -254,74 +261,106 @@
 
     </ion-grid>
 
+    <ion-grid *ngIf="banderaFiltroExcluyente">
+        <ion-row>
+            <!-- Tipo y Expansión -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="tipo">
+                        <ion-item slot="header">
+                            <ion-label>Tipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let tipo of tipos; let i = index">
+                                <ion-checkbox #checkbox [checked]="isTipoSelected(tipo.nombreTipo)" (ionChange)="updateStrictFilters('tipo', tipo.nombreTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('tipo', tipo.nombreTipo, {target: {checked: checkbox.checked}})">{{ tipo.nombreTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
 
-    <ion-list *ngIf="banderaFiltroExcluyente">
-        <!-- Filtro de expansión -->
-        <ion-item>
-            <ion-label>Expansiones</ion-label>
-            <ion-select [(ngModel)]="selectedExpansion" (ionChange)="onExpansionChange(selectedExpansion)" placeholder="Selecciona una expansión">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let expa of expansiones | async" [value]="expa.idExpansion">{{expa.nombreExpansion}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
+                    <ion-accordion value="expansion">
+                        <ion-item slot="header">
+                            <ion-label>Expansión</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let expansion of (expansiones | async); let i = index">
+                                <ion-checkbox #checkbox [checked]="isExpansionSelected(expansion.nombreExpansion)" (ionChange)="updateStrictFilters('expansion', expansion.nombreExpansion, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('expansion', expansion.nombreExpansion, {target: {checked: checkbox.checked}})">{{ expansion.nombreExpansion }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
 
-        <!-- Filtro de rareza -->
-        <ion-item>
-            <ion-label>Rarezas</ion-label>
-            <ion-select [(ngModel)]="selectedRareza" (ionChange)="onRarezaChange(selectedRareza)" placeholder="Selecciona una rareza">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let rare of rarezas" [value]="rare.idRareza">{{rare.nombreRareza}}
-                </ion-select-option>
-            </ion-select>
-        </ion-item>
+            <!-- Rareza y Coste -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="rareza">
+                        <ion-item slot="header">
+                            <ion-label>Rareza</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let rareza of rarezas; let i = index">
+                                <ion-checkbox #checkbox [checked]="isRarezaSelected(rareza.nombreRareza)" (ionChange)="updateStrictFilters('rareza', rareza.nombreRareza, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('rareza', rareza.nombreRareza, {target: {checked: checkbox.checked}})">{{ rareza.nombreRareza }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
 
-        <!-- Filtro de coste -->
-        <ion-item>
-            <ion-label>Coste</ion-label>
-            <ion-select [(ngModel)]="selectedCoste" (ionChange)="onCosteChange(selectedCoste)" placeholder="Seleccione un coste">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let coste of costes" [value]="coste">{{coste}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+                    <ion-accordion value="coste">
+                        <ion-item slot="header">
+                            <ion-label>Coste</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let coste of costes; let i = index">
+                                <ion-checkbox #checkbox [checked]="isCosteSelected(coste)" (ionChange)="updateStrictFilters('costeCarta', coste, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('costeCarta', coste, {target: {checked: checkbox.checked}})">{{ coste }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
 
-        <!-- Filtro de tipo -->
-        <ion-item>
-            <ion-label>Tipos</ion-label>
-            <ion-select [(ngModel)]="selectedTipo" (ionChange)="onTipoChange(selectedTipo)" placeholder="Selecciona un tipo">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let type of tipos" [value]="type.idTipo">{{type.nombreTipo}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+            <!-- Subtipo -->
+            <ion-col size="12" size-md="6">
+                <ion-accordion-group>
+                    <ion-accordion value="subtipo">
+                        <ion-item slot="header">
+                            <ion-label>Subtipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let subtipo of subtipos; let i = index">
+                                <ion-checkbox #checkbox [checked]="isSubtipoSelected(subtipo.nombreSubTipo)" (ionChange)="updateStrictFilters('subtipo', subtipo.nombreSubTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('subtipo', subtipo.nombreSubTipo, {target: {checked: checkbox.checked}})">{{ subtipo.nombreSubTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
+                </ion-accordion-group>
+            </ion-col>
+        </ion-row>
 
-        <!-- Filtro de supertipo -->
-        <ion-item>
-            <ion-label>Supertipo</ion-label>
-            <ion-select [(ngModel)]="selectedSubTipo3" (ionChange)="onSubTipo3Change(selectedSubTipo3)" placeholder="Selecciona un supertipo">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let supertype of supertipo" [value]="supertype.idSubTipo">{{supertype.nombreSubTipo}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+        <ion-row>
+            <ion-col>
+                <ion-card class="ion-padding">
+                    <ion-card-header>
+                        <ion-card-title>
+                            Se han encontrado {{ filteredCartasNuevo?.length }} cartas con los filtros añadidos
+                        </ion-card-title>
+                    </ion-card-header>
+                </ion-card>
+            </ion-col>
+        </ion-row>
 
-        <!-- Filtro de subtipo1 -->
-        <ion-item>
-            <ion-label>SubTipo</ion-label>
-            <ion-select [(ngModel)]="selectedSubTipo" (ionChange)="onSubTipoChange(selectedSubTipo)" placeholder="Selecciona un subtipo">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+        <ion-row *ngFor="let card of filteredCartasNuevo">
+            <ion-col size="12" class="carta-container">
+                <div class="carta-contenido">
+                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="agregarCarta(card)"></ion-img>
+                </div>
+            </ion-col>
+        </ion-row>
 
-        <!-- Filtro de subtipo2 -->
-        <ion-item>
-            <ion-label>SubTipo 2</ion-label>
-            <ion-select [(ngModel)]="selectedSubTipo2" (ionChange)="onSubTipo2Change(selectedSubTipo2)" placeholder="Selecciona un subtipo">
-                <ion-select-option value="0">Deseleccionar</ion-select-option>
-                <ion-select-option *ngFor="let subtype of subtipos" [value]="subtype.idSubTipo">{{subtype.nombreSubTipo}}</ion-select-option>
-            </ion-select>
-        </ion-item>
+    </ion-grid>
 
-    </ion-list>
 
     <ion-row *ngIf="
 !(

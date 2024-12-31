@@ -10,13 +10,14 @@ import { Storage } from '@ionic/storage-angular'; // Importar Ionic Storage
 })
 export class LifeCounterPage {
   // Colores predefinidos
-  predefinedColors: string[] = ['#ff6347', '#4682b4', '#32cd32', '#ffd700', '#9370db'];
+  predefinedColors: string[] = ['#ff6347', '#4682b4', '#32cd32', '#ffd700', '#9370db', '#00ced1', '#d77d07', '#181818'];
+
 
   // Colores seleccionados por el usuario
-  player1Color: string = '#181818';
-  player2Color: string = '#d77d07';
-  player1ItemColor: string = '#5a5a5a';
-  player2ItemColor: string = '#d77d07';
+  player1Color: string;
+  player2Color: string;
+  player1ItemColor: string;
+  player2ItemColor: string;
 
   player1Life: number = 20;
   player2Life: number = 20;
@@ -45,6 +46,19 @@ export class LifeCounterPage {
 
   // Cargar el estado guardado de vidas y del historial
   async loadGameState() {
+
+    const player1Color = await this.storage.get('player1Color');
+    const player2Color = await this.storage.get('player2Color');
+
+    if (player1Color) {
+      this.player1Color = player1Color;
+      this.player1ItemColor = player1Color;
+    }
+    if (player2Color) {
+      this.player2Color = player2Color;
+      this.player2ItemColor = player2Color;
+    }
+
     const player1Life = await this.storage.get('player1Life');
     const player2Life = await this.storage.get('player2Life');
     const player1History = await this.storage.get('player1History');
@@ -58,6 +72,8 @@ export class LifeCounterPage {
 
   // Guardar el estado actual en almacenamiento
   async saveGameState() {
+    await this.storage.set('player1Color', this.player1Color);
+    await this.storage.set('player2Color', this.player2Color);
     await this.storage.set('player1Life', this.player1Life);
     await this.storage.set('player2Life', this.player2Life);
     await this.storage.set('player1History', this.player1History);
@@ -101,7 +117,10 @@ export class LifeCounterPage {
 
 
   addToHistory(amount: number, newLife: number, player: string) {
-    const changeText = `${amount > 0 ? '+' : ''}${amount} = ${newLife}`;
+    const now = new Date();
+    const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}:${now.getMilliseconds()}`;
+    const changeText = `${amount > 0 ? '+' : ''}${amount} = ${newLife} (a las ${timestamp})`;
+
     if (player === 'player1') {
       this.player1History.push(changeText);
       this.player2History.push(''); // Añadir un registro vacío para el jugador 2
@@ -110,6 +129,7 @@ export class LifeCounterPage {
       this.player1History.push(''); // Añadir un registro vacío para el jugador 1
     }
   }
+
 
   async resetLife() {
     const alert = await this.alertController.create({
@@ -144,6 +164,25 @@ export class LifeCounterPage {
   toggleHistory() {
     this.displayHistory = !this.displayHistory;
   }
+
+  // Índices para controlar el color actual de cada jugador
+  private player1ColorIndex: number = 0;
+  private player2ColorIndex: number = 0;
+
+  // Método para cambiar el color de fondo
+  cycleBackgroundColor(player: string) {
+    if (player === 'player1') {
+      this.player1ColorIndex = (this.player1ColorIndex + 1) % this.predefinedColors.length;
+      this.player1Color = this.predefinedColors[this.player1ColorIndex];
+      this.player1ItemColor = this.predefinedColors[this.player1ColorIndex];
+    } else if (player === 'player2') {
+      this.player2ColorIndex = (this.player2ColorIndex + 1) % this.predefinedColors.length;
+      this.player2Color = this.predefinedColors[this.player2ColorIndex];
+      this.player2ItemColor = this.predefinedColors[this.player2ColorIndex];
+    }
+    this.saveGameState(); // Guardar el estado del color seleccionado
+  }
+
 
   /**
    * Al ingresar a este componente, esto provoca que la pantalla no pueda apagarse por la config de energia del aparato
