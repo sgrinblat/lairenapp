@@ -25,6 +25,7 @@ export class ImageGeneratorComponent {
     let acciones = 0;
     let unidades = 0;
     let monumentos = 0;
+    let armas = 0;
     let costeUno = 0;
     let costeDos = 0;
     let costeTres = 0;
@@ -39,14 +40,18 @@ export class ImageGeneratorComponent {
     const mapaDeRepeticiones: { [nombre: string]: number } = {};
     for (const carta of this.reino) {
 
-      if(carta.tipo.nombreTipo == "ACCION") {
+      if(carta.tipo.idTipo == 1) {
         acciones++;
       } else {
-        if(carta.tipo.nombreTipo.startsWith("UNIDAD")) {
+        if(carta.tipo.idTipo == 28) {
           unidades++;
         } else {
-          if(carta.tipo.nombreTipo.startsWith("MONUMENTO")) {
+          if(carta.tipo.idTipo == 17) {
             monumentos++;
+          } else {
+            if(carta.tipo.idTipo == 29) {
+              armas++;
+            }
           }
         }
       }
@@ -150,7 +155,8 @@ export class ImageGeneratorComponent {
     contenedor.appendChild(divMazo);
 
 
-    divMazo.textContent = `Reino: (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
+    divMazo.textContent = `Reino: ${this.reino.length} cartas (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}
+    - Armas: ${armas} ) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
 
     // Inicializar las posiciones y el contador
     let xPosition = 0;

@@ -68,6 +68,7 @@ export class ImageSidedeckComponent {
     let acciones = 0;
     let unidades = 0;
     let monumentos = 0;
+    let armas = 0;
     let tesoros = 0;
     let costeUno = 0;
     let costeDos = 0;
@@ -83,17 +84,17 @@ export class ImageSidedeckComponent {
     const mapaDeRepeticiones: { [nombre: string]: number } = {};
     for (const carta of this.sidedeck) {
 
-      if(carta.tipo.nombreTipo.startsWith("ACCION")) {
+      if(carta.tipo.idTipo == 1) {
         acciones++;
       } else {
-        if(carta.tipo.nombreTipo.startsWith("UNIDAD")) {
+        if(carta.tipo.idTipo == 28) {
           unidades++;
         } else {
-          if(carta.tipo.nombreTipo.startsWith("TESORO")) {
-            tesoros++;
+          if(carta.tipo.idTipo == 17) {
+            monumentos++;
           } else {
-            if(carta.tipo.nombreTipo.startsWith("MONUMENTO")) {
-              monumentos++;
+            if(carta.tipo.idTipo == 29) {
+              armas++;
             }
           }
         }
@@ -138,7 +139,8 @@ export class ImageSidedeckComponent {
       mapaDeRepeticiones[carta.nombreCarta]++;
     }
 
-    divMazo.textContent = `Sidedeck: (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
+    divMazo.textContent = `Sidedeck: ${this.sidedeck.length} cartas (Acciones: ${acciones} - Unidades: ${unidades} - Monumentos: ${monumentos}
+    - Armas: ${armas} ) - (Coste 1: ${costeUno} - Coste 2: ${costeDos} - Coste 3: ${costeTres} - Coste 4: ${costeCuatro} - Coste 5: ${costeCinco} - Coste 6: ${costeSeis} - Coste 7: ${costeSiete} - Coste 8: ${costeOcho} - Coste 9: ${costeNueve})`;
 
     // Inicializar las posiciones y el contador
     let xPosition = 0;

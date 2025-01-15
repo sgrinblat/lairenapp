@@ -11,6 +11,7 @@ import { Carta } from 'src/app/objetos/carta';
 })
 export class ImageBovedaDeckComponent {
   imagenGeneradaBoveda: string;
+  puntosboveda: number = 0;
   @Input() boveda: Carta[] = [];
 
   @Output() imageGenerated = new EventEmitter<string>();
@@ -32,6 +33,10 @@ export class ImageBovedaDeckComponent {
     contenedor.style.position = 'relative';
     contenedor.style.overflow = 'hidden';
     document.body.appendChild(contenedor);
+
+    for (const tesoro of this.boveda) {
+      this.puntosboveda = this.puntosboveda + tesoro.numeroTesoro;
+    }
 
     // Después de crear el contenedor y antes de añadir las imágenes
 
@@ -56,7 +61,7 @@ export class ImageBovedaDeckComponent {
     contenedor.appendChild(divNombre);
 
     const divMazo = document.createElement('div');
-    divMazo.textContent = 'Bóveda: ';
+    divMazo.textContent = `Bóveda: ${this.puntosboveda} puntos`;
     divMazo.style.position = 'absolute';
     divMazo.style.left = '20px';
     divMazo.style.top = divDecklist.offsetHeight + 40 + 'px'; // 20px de margen inicial + 20px de espacio entre textos
