@@ -19,6 +19,9 @@ ion-title {
   max-width: 80%;
   height: auto;
 }
+.carta::part(image) {
+  border-radius: 1rem !important;
+}
 
 .checkbox-group {
   display: flex;

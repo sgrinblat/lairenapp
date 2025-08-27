@@ -1,1 +1,21 @@
+.tab-bar-custom {
+  // Elevala un toque por encima del borde físico
+  padding-bottom: calc(var(--ion-safe-area-bottom) + 15px);
+  // Opcional: también podés subirla visualmente con un margen
+  margin-bottom: 6px;
 
+  // (Opcional) sombra y bordes para que no “pegue” contra el borde
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
+
+  overflow: hidden;
+}
+
+/* tabs.page.scss */
+:host {
+  contain: layout paint; /* pequeñísima ayuda a composición */
+}
+
+/* Si tenés contenido con transform dentro, esto reduce jank durante la animación */
+.ion-page {
+  will-change: transform, opacity;
+}

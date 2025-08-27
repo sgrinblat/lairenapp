@@ -33,6 +33,7 @@
     "@ionic/storage-angular": "^4.0.0",
     "contentful": "^10.6.5",
     "html2canvas": "^1.4.1",
+    "ionic": "^5.4.16",
     "ionicons": "^7.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",

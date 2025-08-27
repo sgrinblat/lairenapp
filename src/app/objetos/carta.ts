@@ -13,6 +13,7 @@ export class Carta {
   rulingCarta!: string;
 
   baneada!: boolean;
+  artista!: string;
 
   valorAtaque!: number;
   valorDefensa!: number;
@@ -38,4 +39,10 @@ export class Carta {
   subtipo!: Subtipo;
   subtipo2!: Subtipo;
   subtipo3!: Subtipo;
+  subtipo4!: Subtipo;
+  subtipo5!: Subtipo;
+
+  imageSrc?: string;      // src actual mostrado
+  _triedRemote?: boolean; // para no entrar en loop
+
 }

@@ -17,9 +17,15 @@
 
         <ion-row>
             <!-- Imagen de la carta -->
-            <ion-col size="12" class="ion-padding-bottom">
-                <ion-img [src]="getCardImage(carta)" [alt]="carta.nombreCarta" (error)="onImageError($event, carta)" [alt]="carta.nombreCarta"></ion-img>
-            </ion-col>
+        <ion-col size="12" class="ion-padding-bottom">
+        <ion-img
+            class="carta"
+            [src]="carta?.imageSrc"
+            [alt]="carta?.nombreCarta"
+            (ionError)="onImageError(carta)">
+        </ion-img>
+        </ion-col>
+
 
             <!-- Información de la carta -->
             <ion-col size="12" class="ion-padding-top ion-padding-bottom">
@@ -51,33 +57,12 @@
                     </ion-label>
                 </ion-item>
 
-                <div *ngIf="carta.tipo.nombreTipo === 'MONUMENTO' && !carta.subtipo?.nombreSubTipo; then noMuestroNada
-                else comprobarAccionRapida">
-                </div>
 
-                <ng-template #noMuestroNada>
-                    <ion-item lines="none">
-                        <ion-label class="ion-text-wrap">
-                            <h5>Subtipo: -</h5>
-                        </ion-label>
-                    </ion-item>
-                </ng-template>
-
-                <ng-template #comprobarAccionRapida>
-                    <ion-item lines="none" *ngIf="carta.tipo.nombreTipo === 'ACCION' && carta.subtipo?.nombreSubTipo === 'RAPIDA'; else mostrarNombreSubtipo">
-                        <ion-label class="ion-text-wrap">
-                            <h5>Supertipo: {{ carta.subtipo.nombreSubTipo }}</h5>
-                        </ion-label>
-                    </ion-item>
-                </ng-template>
-
-                <ng-template #mostrarNombreSubtipo>
-                    <ion-item lines="none">
-                        <ion-label class="ion-text-wrap">
-                            <h5>Subtipo: {{ carta?.subtipo?.nombreSubTipo }}</h5>
-                        </ion-label>
-                    </ion-item>
-                </ng-template>
+                <ion-item *ngIf="carta?.subtipo" lines="none">
+                    <ion-label class="ion-text-wrap">
+                        <h5>Subtipo: {{carta?.subtipo?.nombreSubTipo}}</h5>
+                    </ion-label>
+                </ion-item>
 
 
                 <ion-item *ngIf="carta?.subtipo2" lines="none">
@@ -88,11 +73,17 @@
                     </ion-label>
                 </ion-item>
 
-                <ion-item *ngIf="carta?.subtipo2" lines="none">
+                <ion-item *ngIf="carta?.subtipo3" lines="none">
                     <ion-label class="ion-text-wrap">
                         <h5 *ngIf="carta?.subtipo3">
                             Supertipo: {{carta?.subtipo3?.nombreSubTipo}}
                         </h5>
+                    </ion-label>
+                </ion-item>
+
+                <ion-item *ngIf="carta?.subtipo4" lines="none" >
+                    <ion-label class="ion-text-wrap">
+                        <h5>Supertipo: {{ carta?.subtipo4?.nombreSubTipo }}</h5>
                     </ion-label>
                 </ion-item>
 
@@ -125,6 +116,13 @@
                 <ion-item *ngIf="carta?.flavorCarta" lines="none">
                     <ion-label class="ion-text-wrap">
                         <h5>Texto de ambientación: {{carta.flavorCarta}}</h5>
+                    </ion-label>
+                </ion-item>
+
+
+                <ion-item *ngIf="carta?.artista" lines="none">
+                    <ion-label class="ion-text-wrap">
+                        <h5>Artista: {{carta.artista}}</h5>
                     </ion-label>
                 </ion-item>
 

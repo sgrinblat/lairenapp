@@ -105,6 +105,17 @@
                             </div>
                         </div>
                     </ion-accordion>
+                    <ion-accordion value="supertipo">
+                        <ion-item slot="header">
+                            <ion-label>Supertipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let supertype of supertipo; let i = index">
+                                <ion-checkbox #checkbox [checked]="isSupertypeSelected(supertype.nombreSubTipo)" (ionChange)="updateFilters('subtipo', supertype.nombreSubTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateFilters('subtipo', supertype.nombreSubTipo, {target: {checked: checkbox.checked}})">{{ supertype.nombreSubTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
                 </ion-accordion-group>
             </ion-col>
         </ion-row>
@@ -124,14 +135,21 @@
         <ion-row *ngFor="let card of filteredCartasNuevo">
             <ion-col size="12" class="carta-container">
                 <div class="carta-contenido">
-                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="visualizarCarta(card.idCarta)"></ion-img>
-                    <div>
-                        <p>{{acortarTexto(card.textoCarta)}}</p>
-                        <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
-                    </div>
+                <ion-img class="carta"
+                        [src]="card.imageSrc"
+                        [alt]="card.nombreCarta"
+                        (ionError)="onImageError(card)"
+                        (click)="visualizarCarta(card.idCarta)">
+                </ion-img>
+
+                <div>
+                    <p>{{ acortarTexto(card.textoCarta) }}</p>
+                    <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
+                </div>
                 </div>
             </ion-col>
         </ion-row>
+
 
     </ion-grid>
 
@@ -210,6 +228,17 @@
                             </div>
                         </div>
                     </ion-accordion>
+                    <ion-accordion value="supertipo">
+                        <ion-item slot="header">
+                            <ion-label>Supertipo</ion-label>
+                        </ion-item>
+                        <div class="ion-padding" slot="content" style="max-height: 200px; overflow-y: auto;">
+                            <div class="checkbox-group" *ngFor="let supertype of supertipo; let i = index">
+                                <ion-checkbox #checkbox [checked]="isSupertypeSelected(supertype.nombreSubTipo)" (ionChange)="updateStrictFilters('subtipo', supertype.nombreSubTipo, $event)"></ion-checkbox>
+                                <ion-label color="dark" class="label" (click)="checkbox.checked = !checkbox.checked; updateStrictFilters('subtipo', supertype.nombreSubTipo, {target: {checked: checkbox.checked}})">{{ supertype.nombreSubTipo }}</ion-label>
+                            </div>
+                        </div>
+                    </ion-accordion>
                 </ion-accordion-group>
             </ion-col>
         </ion-row>
@@ -229,11 +258,17 @@
         <ion-row *ngFor="let card of filteredCartasNuevo">
             <ion-col size="12" class="carta-container">
                 <div class="carta-contenido">
-                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="visualizarCarta(card.idCarta)"></ion-img>
-                    <div>
-                        <p>{{acortarTexto(card.textoCarta)}}</p>
-                        <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
-                    </div>
+                <ion-img class="carta"
+                        [src]="card.imageSrc"
+                        [alt]="card.nombreCarta"
+                        (ionError)="onImageError(card)"
+                        (click)="visualizarCarta(card.idCarta)">
+                </ion-img>
+
+                <div>
+                    <p>{{ acortarTexto(card.textoCarta) }}</p>
+                    <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
+                </div>
                 </div>
             </ion-col>
         </ion-row>
@@ -308,11 +343,17 @@
         <ion-row *ngFor="let carta of filteredCartas">
             <ion-col size="12" class="carta-container">
                 <div class="carta-contenido">
-                    <ion-img class="carta" [src]="getCardImage(carta)" [alt]="carta.nombreCarta" (error)="onImageError($event, carta)" (click)="visualizarCarta(carta.idCarta)"></ion-img>
-                    <div class="carta-texto">
-                        <p>{{acortarTexto(carta.textoCarta)}}</p>
-                        <p><a (click)="visualizarCarta(carta.idCarta)">... Ver más</a></p>
-                    </div>
+                <ion-img class="carta"
+                        [src]="carta.imageSrc"
+                        [alt]="carta.nombreCarta"
+                        (ionError)="onImageError(carta)"
+                        (click)="visualizarCarta(carta.idCarta)">
+                </ion-img>
+
+                <div>
+                    <p>{{ acortarTexto(carta.textoCarta) }}</p>
+                    <p><a (click)="visualizarCarta(carta.idCarta)">... Ver más</a></p>
+                </div>
                 </div>
             </ion-col>
         </ion-row>
@@ -331,17 +372,25 @@
         !banderaFiltroIncluyente &&
         !banderaFiltroExcluyente
       ">
-        <ion-row *ngFor="let card of cartas">
-            <ion-col size="12" class="carta-container">
-                <div class="carta-contenido">
-                    <ion-img class="carta" [src]="getCardImage(card)" [alt]="card.nombreCarta" (error)="onImageError($event, card)" (click)="visualizarCarta(card.idCarta)"></ion-img>
-                    <div>
-                        <p>{{acortarTexto(card.textoCarta)}}</p>
-                        <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
-                    </div>
-                </div>
-            </ion-col>
-        </ion-row>
+<ion-row *ngFor="let card of cartas">
+  <ion-col size="12" class="carta-container">
+    <div class="carta-contenido">
+      <!-- Usamos card.imageSrc y escuchamos (ionError) propio de ion-img -->
+      <ion-img class="carta"
+               [src]="card.imageSrc"
+               [alt]="card.nombreCarta"
+               (ionError)="onImageError(card)"
+               (click)="visualizarCarta(card.idCarta)">
+      </ion-img>
+
+      <div>
+        <p>{{ acortarTexto(card.textoCarta) }}</p>
+        <p><a (click)="visualizarCarta(card.idCarta)">... Ver más</a></p>
+      </div>
+    </div>
+  </ion-col>
+</ion-row>
+
     </ion-grid>
 
     <ion-row *ngIf="

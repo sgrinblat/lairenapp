@@ -24,3 +24,21 @@
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
+
+
+/* Variables “safe area” unificadas para iOS (env) y Android (vars nativas que seteamos desde MainActivity) */
+:root {
+  --safe-area-top:   max(env(safe-area-inset-top, 0px),   var(--android-inset-top, 0px));
+  --safe-area-bottom:max(env(safe-area-inset-bottom, 0px),var(--android-inset-bottom, 0px));
+}
+
+/* Tu tab bar/footers elevados para no pisar gestos */
+.tab-bar-custom,
+.footer-elevado {
+  padding-bottom: calc(var(--safe-area-bottom) + 10px);
+}
+
+/* Si tenés contenidos que deben despegarse del notch/estatus */
+.content-ajustado {
+  --padding-top: var(--safe-area-top);
+}

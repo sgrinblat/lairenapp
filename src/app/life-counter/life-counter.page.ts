@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { KeepAwake } from '@capacitor-community/keep-awake';
 import { AlertController, ModalController } from '@ionic/angular';
-import { Storage } from '@ionic/storage-angular'; // Importar Ionic Storage
+import { Storage } from '@ionic/storage-angular';
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+
+type Player = 'player1' | 'player2';
 
 @Component({
   selector: 'app-life-counter',
@@ -11,7 +14,6 @@ import { Storage } from '@ionic/storage-angular'; // Importar Ionic Storage
 export class LifeCounterPage {
   // Colores predefinidos
   predefinedColors: string[] = ['#ff6347', '#4682b4', '#32cd32', '#ffd700', '#9370db', '#00ced1', '#d77d07', '#181818'];
-
 
   // Colores seleccionados por el usuario
   player1Color: string;
@@ -33,10 +35,16 @@ export class LifeCounterPage {
 
   private audioContext: AudioContext = new AudioContext();
 
+  // --- Estado para hold/long-press ---
+  private holdMap: Record<string, { t?: any; interval?: any; fired: boolean; pressing: boolean }> = {};
+
+  // Índices para controlar el color actual de cada jugador
+  private player1ColorIndex: number = 0;
+  private player2ColorIndex: number = 0;
+
   constructor(private alertController: AlertController, private modalController: ModalController, private storage: Storage) {
     this.initStorage();
   }
-
 
   // Inicializar el almacenamiento
   async initStorage() {
@@ -46,7 +54,6 @@ export class LifeCounterPage {
 
   // Cargar el estado guardado de vidas y del historial
   async loadGameState() {
-
     const player1Color = await this.storage.get('player1Color');
     const player2Color = await this.storage.get('player2Color');
 
@@ -95,7 +102,7 @@ export class LifeCounterPage {
     this.saveGameState(); // Guardar el estado después de cada cambio
   }
 
-  updateChangeCounter(amount: number, player: string) {
+  updateChangeCounter(amount: number, player: Player) {
     if (player === 'player1') {
       clearTimeout(this.player1Timeout);
       this.player1ChangeCounter += amount;
@@ -115,8 +122,7 @@ export class LifeCounterPage {
     }
   }
 
-
-  addToHistory(amount: number, newLife: number, player: string) {
+  addToHistory(amount: number, newLife: number, player: Player) {
     const now = new Date();
     const timestamp = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}:${now.getMilliseconds()}`;
     const changeText = `${amount > 0 ? '+' : ''}${amount} = ${newLife} (a las ${timestamp})`;
@@ -129,7 +135,6 @@ export class LifeCounterPage {
       this.player1History.push(''); // Añadir un registro vacío para el jugador 1
     }
   }
-
 
   async resetLife() {
     const alert = await this.alertController.create({
@@ -165,12 +170,8 @@ export class LifeCounterPage {
     this.displayHistory = !this.displayHistory;
   }
 
-  // Índices para controlar el color actual de cada jugador
-  private player1ColorIndex: number = 0;
-  private player2ColorIndex: number = 0;
-
   // Método para cambiar el color de fondo
-  cycleBackgroundColor(player: string) {
+  cycleBackgroundColor(player: Player) {
     if (player === 'player1') {
       this.player1ColorIndex = (this.player1ColorIndex + 1) % this.predefinedColors.length;
       this.player1Color = this.predefinedColors[this.player1ColorIndex];
@@ -183,7 +184,6 @@ export class LifeCounterPage {
     this.saveGameState(); // Guardar el estado del color seleccionado
   }
 
-
   /**
    * Al ingresar a este componente, esto provoca que la pantalla no pueda apagarse por la config de energia del aparato
    */
@@ -193,10 +193,7 @@ export class LifeCounterPage {
         console.log('La pantalla se mantendrá encendida');
       })
       .catch((error) => {
-        console.error(
-          'Error al intentar mantener la pantalla encendida',
-          error
-        );
+        console.error('Error al intentar mantener la pantalla encendida', error);
       });
   }
 
@@ -209,10 +206,7 @@ export class LifeCounterPage {
         console.log('La pantalla puede apagarse');
       })
       .catch((error) => {
-        console.error(
-          'Error al intentar permitir que la pantalla se apague',
-          error
-        );
+        console.error('Error al intentar permitir que la pantalla se apague', error);
       });
   }
 
@@ -221,21 +215,12 @@ export class LifeCounterPage {
    * @param url ruta del sonido
    */
   async playSound(url: string) {
-    // Fetch the audio file data from the URL
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
-
-    // Decode the audio data
     const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
-
-    // Create an audio source
     const source = this.audioContext.createBufferSource();
     source.buffer = audioBuffer;
-
-    // Connect the source to the context's destination
     source.connect(this.audioContext.destination);
-
-    // Play the audio
     source.start();
   }
 
@@ -243,8 +228,82 @@ export class LifeCounterPage {
    * Busca un sonido en los assets para reproducirlo
    */
   reproducirSonido() {
-    // URL of the sound you want to play
     const soundUrl = '../../assets/click.mp3';
     this.playSound(soundUrl);
+  }
+
+  // ---------- Hold / Long-Press con repetición y color dinámico ----------
+
+  private keyFor(player: Player, amount: number) {
+    // amount puede ser +1 o -1
+    return `${player}_${amount > 0 ? 'inc' : 'dec'}`;
+  }
+
+  // Para colorear el botón durante el hold
+  isHolding(player: Player, amount: number): boolean {
+    const k = this.keyFor(player, amount);
+    return !!this.holdMap[k]?.pressing;
+  }
+
+  // Vibraciones suaves (si Haptics está disponible)
+  private async hapticImpact() {
+    try { await Haptics.impact({ style: ImpactStyle.Light }); } catch {}
+  }
+  private async hapticNotify() {
+    try { await Haptics.notification({ type: NotificationType.Success }); } catch {}
+  }
+
+  onHoldStart(player: Player, amount: number) {
+    const key = this.keyFor(player, amount);
+    // Cancelar si había algo previo
+    this.onHoldCancel(player, amount);
+
+    this.holdMap[key] = { fired: false, pressing: true };
+
+    // A los 3s: aplica ±10 y comienza repetición cada 1s mientras siga presionando
+    this.holdMap[key].t = setTimeout(async () => {
+      const entry = this.holdMap[key];
+      if (!entry || !entry.pressing) return;
+
+      entry.fired = true;
+      await this.hapticNotify(); // vibración por long-press logrado
+      this.changeLifeCount(amount * 10, player);
+
+      // Repetición cada 1s mientras mantenga presionado
+      entry.interval = setInterval(async () => {
+        const e = this.holdMap[key];
+        if (!e || !e.pressing) { clearInterval(entry.interval); return; }
+        await this.hapticImpact(); // vibración leve por tick
+        this.changeLifeCount(amount * 10, player);
+      }, 500);
+    }, 700);
+  }
+
+  onHoldEnd(player: Player, amount: number) {
+    const key = this.keyFor(player, amount);
+    const entry = this.holdMap[key];
+    if (!entry) return;
+
+    entry.pressing = false;
+    clearTimeout(entry.t);
+    if (entry.interval) clearInterval(entry.interval);
+
+    // Si NO llegó al long-press (no fired), esto es tap corto => ±1
+    if (!entry.fired) {
+      this.changeLifeCount(amount, player);
+    }
+
+    delete this.holdMap[key];
+  }
+
+  onHoldCancel(player: Player, amount: number) {
+    const key = this.keyFor(player, amount);
+    const entry = this.holdMap[key];
+    if (!entry) return;
+
+    entry.pressing = false;
+    clearTimeout(entry.t);
+    if (entry.interval) clearInterval(entry.interval);
+    delete this.holdMap[key];
   }
 }

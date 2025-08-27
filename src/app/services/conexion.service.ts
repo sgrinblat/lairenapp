@@ -315,8 +315,10 @@ export class ConexionService {
 
   // ---------------------- GLOSARIO ----------------------
 
-  getTodosLosKeywords():Observable<Glosario[]> {
-    return this.httpClient.get<Glosario[]>(`${this.glosarioPublicoURL}/todos`);
+  getTodosLosKeywords(): Observable<Glosario[]> {
+    return this.httpClient.get<Glosario[]>(`${this.glosarioPublicoURL}/todos`).pipe(
+      map(keywords => keywords.sort((a, b) => a.keywordNombre.localeCompare(b.keywordNombre)))
+    );
   }
 
   getKeywordById(id:number): Observable<Glosario> {

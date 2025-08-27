@@ -25,27 +25,42 @@ export class CartaIndividualPage implements OnInit {
    * Renderiza la info de una carta especifica en el front
    */
   ngOnInit(): void {
-    this.id = this.route.snapshot.params['id'];
+  this.id = this.route.snapshot.params['id'];
 
-    this.conexion.getCartaByIdPublic(this.id).subscribe(
-      (dato) => {
-        this.carta = dato;
-      },
-      (error) => console.log(error),
-      () => {}
-    );
-  }
+  this.conexion.getCartaByIdPublic(this.id).subscribe(
+    (dato: Carta) => {
+      // seteamos src local al inicio
+      this.carta = {
+        ...dato,
+        imageSrc: this.getLocalPath(dato) || this.getPlaceholder(),
+        _triedRemote: false
+      };
+    },
+    (error) => console.log(error),
+    () => {}
+  );
+}
 
-  getCardImage(card: Carta): string {
-    // Retorna la ruta local de la carta
-    return `../../../../../assets/decklists/${card.nombreCarta}.webp`;
-  }
+// Ruta local (ajustá carpeta/extensión si hace falta)
+getLocalPath(card: Carta): string {
+  const fileName = `${encodeURIComponent(card.nombreCarta)}.webp`;
+  return `assets/decklists/${fileName}`;
+}
 
-  onImageError(event: Event, card: Carta): void {
-    // Cambia la imagen rota a la URL remota o una imagen predeterminada
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = card.urlImagen;
+getPlaceholder(): string {
+  return `assets/images/placeholder.webp`;
+}
+
+// Fallback: local → remota → placeholder
+onImageError(card: Carta): void {
+  if (!card._triedRemote && card.urlImagen) {
+    card._triedRemote = true;
+    card.imageSrc = card.urlImagen;
+    return;
   }
+  card.imageSrc = this.getPlaceholder();
+}
+
 
   visualizarCarta() {
     this.router.navigate(['/tabs/tab1']);

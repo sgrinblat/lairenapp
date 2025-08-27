@@ -1,111 +1,142 @@
 <ion-content [ngClass]="{'no-scroll': !displayHistory}" color="dark">
-    <div class="container" *ngIf="!displayHistory">
-        <!-- Sección del jugador 1 -->
-        <div class="counter-section top" [ngStyle]="{'background-color': player1Color}">
-            <ion-row class="ion-align-items-center ion-justify-content-center">
-                <ion-col size="2" class="ion-text-center">
-                    <ion-button color="success" (click)="changeLifeCount(1, 'player1')" class="change-button">+</ion-button>
-                </ion-col>
-                <ion-col size="8" class="ion-text-center">
-                    <div class="life-count player1-counter">{{ player1Life }}</div>
-                </ion-col>
-                <ion-col size="2" class="ion-text-center">
-                    <ion-button color="danger" (click)="changeLifeCount(-1, 'player1')" class="change-button">-</ion-button>
-                </ion-col>
+  <div class="container" *ngIf="!displayHistory">
+    <!-- Sección del jugador 1 -->
+    <div class="counter-section top" [ngStyle]="{'background-color': player1Color}">
+      <ion-row class="ion-align-items-center ion-justify-content-center">
+        <ion-col size="2" class="ion-text-center">
+          <ion-button
+            [color]="isHolding('player1', +1) ? 'warning' : 'success'"
+            class="change-button"
+            (pointerdown)="onHoldStart('player1', +1)"
+            (pointerup)="onHoldEnd('player1', +1)"
+            (pointerleave)="onHoldCancel('player1', +1)"
+            (touchcancel)="onHoldCancel('player1', +1)"
+          >+</ion-button>
+        </ion-col>
 
-                <div class="change-indicator player1-counter" *ngIf="displayPlayer1Counter">
-                    {{ player1ChangeCounter > 0 ? '+' : '' }}{{ player1ChangeCounter }}
-                </div>
-            </ion-row>
+        <ion-col size="8" class="ion-text-center">
+          <div class="life-count player1-counter">{{ player1Life }}</div>
+        </ion-col>
+
+        <ion-col size="2" class="ion-text-center">
+          <ion-button
+            [color]="isHolding('player1', -1) ? 'warning' : 'danger'"
+            class="change-button"
+            (pointerdown)="onHoldStart('player1', -1)"
+            (pointerup)="onHoldEnd('player1', -1)"
+            (pointerleave)="onHoldCancel('player1', -1)"
+            (touchcancel)="onHoldCancel('player1', -1)"
+          >-</ion-button>
+        </ion-col>
+
+        <div class="change-indicator player1-counter" *ngIf="displayPlayer1Counter">
+          {{ player1ChangeCounter > 0 ? '+' : '' }}{{ player1ChangeCounter }}
         </div>
-
-        <!-- Contenedor para los tres botones -->
-        <div class="button-group-container">
-            <ion-row class="ion-justify-content-center">
-                <!-- Botón para mostrar/ocultar el historial -->
-                <ion-col size="6">
-                    <ion-button expand="block" color="medium" class="history-button" (click)="toggleHistory()">
-                        <ion-icon name="time"></ion-icon>
-                    </ion-button>
-                </ion-col>
-
-                <!-- Botón de reinicio -->
-                <ion-col size="6">
-                    <ion-button expand="block" color="medium" class="reset-button" (click)="resetLife()">
-                        <ion-icon name="refresh"></ion-icon>
-                    </ion-button>
-                </ion-col>
-
-                <ion-col size="6">
-                    <ion-button expand="block" color="medium" class="paint-button" (click)="cycleBackgroundColor('player1')">
-                        <ion-icon name="color-palette-outline"></ion-icon> - °1
-                    </ion-button>
-                </ion-col>
-                <ion-col size="6">
-                    <ion-button expand="block" color="medium" class="paint-button" (click)="cycleBackgroundColor('player2')">
-                        <ion-icon name="color-palette-outline"></ion-icon> - °2
-                    </ion-button>
-                </ion-col>
-
-            </ion-row>
-        </div>
-
-        <!-- Sección del jugador 2 -->
-        <div class="counter-section bottom" [ngStyle]="{'background-color': player2Color}">
-            <ion-row class="ion-align-items-center ion-justify-content-center">
-                <ion-col size="2" class="ion-text-center">
-                    <ion-button color="danger" (click)="changeLifeCount(-1, 'player2')" class="change-button">-</ion-button>
-                </ion-col>
-                <ion-col size="8" class="ion-text-center">
-                    <div class="life-count">{{ player2Life }}</div>
-                </ion-col>
-                <ion-col size="2" class="ion-text-center">
-                    <ion-button color="success" (click)="changeLifeCount(1, 'player2')" class="change-button">+</ion-button>
-                </ion-col>
-
-                <div class="change-indicator player2" *ngIf="displayPlayer2Counter">
-                    {{ player2ChangeCounter > 0 ? '+' : '' }}{{ player2ChangeCounter }}
-                </div>
-            </ion-row>
-        </div>
+      </ion-row>
     </div>
 
-    <div class="history-fullscreen" *ngIf="displayHistory">
-        <ion-grid>
-            <ion-row>
-                <!-- Historial del Jugador 1 -->
-                <ion-col size="6" class="player-history-column">
-                    <h3 class="ion-text-center">Jugador 1</h3>
-                    <ion-list>
-                        <ion-item color="dark" *ngFor="let record of player1History" class="history-item" [ngStyle]="{'background-color': player1ItemColor}">
-                            <ion-text color="light" class="textoHistorial white">
-                                <div>{{ record.split(' (a las ')[0] }}</div>
-                                <small style="font-size: smaller;">{{ record.split(' (a las ')[1]?.slice(0, -1) }}</small>
-                            </ion-text>
-                        </ion-item>
-                    </ion-list>
-                </ion-col>
+    <!-- Contenedor para los tres botones -->
+    <div class="button-group-container">
+      <ion-row class="ion-justify-content-center">
+        <!-- Botón para mostrar/ocultar el historial -->
+        <ion-col size="6">
+          <ion-button expand="block" color="medium" class="history-button" (click)="toggleHistory()">
+            <ion-icon name="time"></ion-icon>
+          </ion-button>
+        </ion-col>
 
-                <!-- Historial del Jugador 2 -->
-                <ion-col size="6" class="player-history-column">
-                    <h3 class="ion-text-center">Jugador 2</h3>
-                    <ion-list>
-                        <ion-item color="dark" *ngFor="let record of player2History" class="history-item" [ngStyle]="{'background-color': player2ItemColor}">
-                            <ion-text color="light" class="textoHistorial white">
-                                <div>{{ record.split(' (a las ')[0] }}</div>
-                                <small style="font-size: smaller;">{{ record.split(' (a las ')[1]?.slice(0, -1) }}</small>
-                            </ion-text>
-                        </ion-item>
-                    </ion-list>
-                </ion-col>
-            </ion-row>
-        </ion-grid>
+        <!-- Botón de reinicio -->
+        <ion-col size="6">
+          <ion-button expand="block" color="medium" class="reset-button" (click)="resetLife()">
+            <ion-icon name="refresh"></ion-icon>
+          </ion-button>
+        </ion-col>
 
-        <!-- Botón de cierre centrado en la parte inferior -->
-        <div class="close-button-container">
-            <ion-fab-button color="danger" (click)="toggleHistory()">
-                <ion-icon name="close"></ion-icon>
-            </ion-fab-button>
-        </div>
+        <ion-col size="6">
+          <ion-button expand="block" color="medium" class="paint-button" (click)="cycleBackgroundColor('player1')">
+            <ion-icon name="color-palette-outline"></ion-icon> - °1
+          </ion-button>
+        </ion-col>
+        <ion-col size="6">
+          <ion-button expand="block" color="medium" class="paint-button" (click)="cycleBackgroundColor('player2')">
+            <ion-icon name="color-palette-outline"></ion-icon> - °2
+          </ion-button>
+        </ion-col>
+      </ion-row>
     </div>
+
+    <!-- Sección del jugador 2 -->
+    <div class="counter-section bottom" [ngStyle]="{'background-color': player2Color}">
+      <ion-row class="ion-align-items-center ion-justify-content-center">
+        <ion-col size="2" class="ion-text-center">
+          <ion-button
+            [color]="isHolding('player2', -1) ? 'warning' : 'danger'"
+            class="change-button"
+            (pointerdown)="onHoldStart('player2', -1)"
+            (pointerup)="onHoldEnd('player2', -1)"
+            (pointerleave)="onHoldCancel('player2', -1)"
+            (touchcancel)="onHoldCancel('player2', -1)"
+          >-</ion-button>
+        </ion-col>
+
+        <ion-col size="8" class="ion-text-center">
+          <div class="life-count">{{ player2Life }}</div>
+        </ion-col>
+
+        <ion-col size="2" class="ion-text-center">
+          <ion-button
+            [color]="isHolding('player2', +1) ? 'warning' : 'success'"
+            class="change-button"
+            (pointerdown)="onHoldStart('player2', +1)"
+            (pointerup)="onHoldEnd('player2', +1)"
+            (pointerleave)="onHoldCancel('player2', +1)"
+            (touchcancel)="onHoldCancel('player2', +1)"
+          >+</ion-button>
+        </ion-col>
+
+        <div class="change-indicator player2" *ngIf="displayPlayer2Counter">
+          {{ player2ChangeCounter > 0 ? '+' : '' }}{{ player2ChangeCounter }}
+        </div>
+      </ion-row>
+    </div>
+  </div>
+
+  <div class="history-fullscreen" *ngIf="displayHistory">
+    <ion-grid>
+      <ion-row>
+        <!-- Historial del Jugador 1 -->
+        <ion-col size="6" class="player-history-column">
+          <h3 class="ion-text-center">Jugador 1</h3>
+          <ion-list>
+            <ion-item color="dark" *ngFor="let record of player1History" class="history-item" [ngStyle]="{'background-color': player1ItemColor}">
+              <ion-text color="light" class="textoHistorial white">
+                <div>{{ record.split(' (a las ')[0] }}</div>
+                <small style="font-size: smaller;">{{ record.split(' (a las ')[1]?.slice(0, -1) }}</small>
+              </ion-text>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+
+        <!-- Historial del Jugador 2 -->
+        <ion-col size="6" class="player-history-column">
+          <h3 class="ion-text-center">Jugador 2</h3>
+          <ion-list>
+            <ion-item color="dark" *ngFor="let record of player2History" class="history-item" [ngStyle]="{'background-color': player2ItemColor}">
+              <ion-text color="light" class="textoHistorial white">
+                <div>{{ record.split(' (a las ')[0] }}</div>
+                <small style="font-size: smaller;">{{ record.split(' (a las ')[1]?.slice(0, -1) }}</small>
+              </ion-text>
+            </ion-item>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+
+    <!-- Botón de cierre centrado en la parte inferior -->
+    <div class="close-button-container">
+      <ion-fab-button color="danger" (click)="toggleHistory()">
+        <ion-icon name="close"></ion-icon>
+      </ion-fab-button>
+    </div>
+  </div>
 </ion-content>

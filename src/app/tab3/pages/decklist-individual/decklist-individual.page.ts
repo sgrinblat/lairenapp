@@ -277,8 +277,15 @@ export class DecklistIndividualPage implements OnInit {
       this.conexion.getTodasLosSubTipos().pipe(
         map(subtipos => subtipos.sort((a, b) => a.nombreSubTipo.localeCompare(b.nombreSubTipo)))
       ).subscribe(subtipos => {
-        this.supertipo = subtipos.filter(subtipo => subtipo.nombreSubTipo === 'REALEZA');
-        this.subtipos = subtipos.filter(subtipo => subtipo.nombreSubTipo !== 'REALEZA');
+        // Filtramos los objetos con 'REALEZA' o 'RÁPIDA' en el array supertipo
+        this.supertipo = subtipos.filter(subtipo =>
+          subtipo.nombreSubTipo === 'REALEZA' || subtipo.nombreSubTipo === 'RAPIDA'
+        );
+  
+        // Almacenar los demás objetos en el array subtipos
+        this.subtipos = subtipos.filter(subtipo =>
+          subtipo.nombreSubTipo !== 'REALEZA' && subtipo.nombreSubTipo !== 'RAPIDA'
+        );
       });
   }
 
@@ -295,6 +302,27 @@ export class DecklistIndividualPage implements OnInit {
     );
   }
 
+    // Ruta local (en Ionic usar siempre 'assets/...'). Encodeamos por si hay espacios o tildes.
+    getLocalPath(card: Carta): string {
+      // Ajustá la carpeta/extensión si en tu proyecto es otra (por ej. assets/images/decklists y/o .jpg)
+      const fileName = `${encodeURIComponent(card.nombreCarta)}.webp`;
+      return `assets/decklists/${fileName}`;
+    }
+
+    // Placeholder por si falla todo
+    getPlaceholder(): string {
+      return 'assets/images/placeholder.webp';
+    }
+
+    // Fallback en cascada: local -> remota -> placeholder
+    onImageError(card: Carta): void {
+      if (!card._triedRemote && card.urlImagen) {
+        card._triedRemote = true;
+        card.imageSrc = card.urlImagen;
+        return;
+      }
+      card.imageSrc = this.getPlaceholder();
+    }
 
 
   soloDominacion() {
@@ -308,6 +336,12 @@ export class DecklistIndividualPage implements OnInit {
       this.cartas = this.cartas.filter(carta => carta.baneada == false);
 
       this.cartas = this.cartas.filter(carta => carta.tipo.idTipo !== 30);
+
+      this.cartas = this.cartas.map(card => ({
+      ...card,
+      imageSrc: this.getLocalPath(card) || this.getPlaceholder(),
+      _triedRemote: false
+      }));
 
       // Obtiene y ordena los costes únicos de las cartas
       this.costes = this.getUniqueCostesCartas(this.cartas);
@@ -465,6 +499,9 @@ export class DecklistIndividualPage implements OnInit {
     return this.filters.tipo.includes(nombreTipo);
   }
   isSubtipoSelected(nombreSubTipo: string): boolean {
+    return this.filters.subtipo.includes(nombreSubTipo);
+  }
+  isSupertipoSelected(nombreSubTipo: string): boolean {
     return this.filters.subtipo.includes(nombreSubTipo);
   }
 
@@ -1393,16 +1430,6 @@ export class DecklistIndividualPage implements OnInit {
     toast.present();
   }
 
-  getCardImage(card: Carta): string {
-    // Retorna la ruta local de la carta
-    return `../../../../../assets/decklists/${card.nombreCarta}.webp`;
-  }
-
-  onImageError(event: Event, card: Carta): void {
-    // Cambia la imagen rota a la URL remota o una imagen predeterminada
-    const imgElement = event.target as HTMLImageElement;
-    imgElement.src = card.urlImagen;
-  }
 
 }
 
